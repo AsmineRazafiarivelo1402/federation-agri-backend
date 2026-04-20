@@ -1,0 +1,13 @@
+openapi: 3.0.3
+info:
+  title: Federation Agri Backend API
+  description: |
+    Backend built with Spring Boot for a Malagasy agricultural federation.
+    This API enables efficient management of members, cooperatives (collectivités), 
+    and administrative processes (votes, mandates, and finances) through a 
+    scalable and well-structured REST architecture.
+  version: 0.1.0
+
+servers:
+  - url: http://localhost:8080
+    description: Serveur de développement local
