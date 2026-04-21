@@ -87,6 +87,133 @@ paths:
         '404':
           description: "Member not found"
 
+  /federation/reports:
+    get:
+      summary: "Get global federation monthly/annual report"
+      description: "Aggregates data from all collectivities to rank performance based on attendance, financial health, and growth."
+
+      parameters:
+        - name: startDate
+          in: query
+          required: true
+          schema:
+           type: string
+           format: date
+        - name: endDate
+          in: query
+          required: true
+          schema:
+           type: string
+           format: date
+      responses:
+        '200':
+          description: "Global report generated successfully"
+          content:
+            application/json:
+              schema:
+               type: array
+               items:
+                 $ref: '#/components/schemas/FederationCollectivityStats'
+
+  /collectivites/{id}/comptes:
+    get:
+      summary: "List all financial accounts for a collectivity"
+      description: "Returns the list of bank, mobile money, and cash accounts with their balances in MGA."
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: "List of accounts"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Account'
+
+
+  /activities:
+    post:
+      summary: "Schedule a new activity"
+      description: "Registers mandatory (GA, Junior training) or exceptional activities."
+      operationId: createActivity
+      tags:
+        - Activities
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Activity'
+      responses:
+        '201':
+          description: "Activity created"
+
+  /activities/{activityId}/attendance:
+    post:
+      summary: "Record member attendance"
+      description: "Records who was present, absent, or excused with motifs for a specific activity."
+
+      parameters:
+        - name: activityId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/AttendanceRecord'
+      responses:
+        '200':
+          description: "Attendance saved"
+
+  /collectivites/{id}/reports/monthly:
+    get:
+      summary: "Get monthly performance report"
+      description: "Returns the global attendance rate and total member count for the federation."
+      operationId: getMonthlyReport
+      tags:
+        - Statistics
+      responses:
+        '200':
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonthlyReport'
+
+  /collectivites/{id}/members/{memberId}/stats:
+    get:
+      summary: "Get detailed statistics for an active member"
+      description: "Provides attendance rate, total payments, and potential debts over a given period."
+      operationId: getMemberStats
+      tags:
+        - Statistics
+      parameters:
+        - name: startDate
+          in: query
+          schema: { type: string, format: date }
+        - name: endDate
+          in: query
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: "Member statistics"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemberStats'
+
 
 components:
   schemas:
@@ -115,8 +242,8 @@ components:
         - adresse
         - metier
         - telephone
-        - idParrain
-        - preuvePaiement
+        - parrains
+        - paiement
       properties:
         nom:
           type: string
@@ -261,9 +388,115 @@ components:
         statut:
           type: string
           example: "VALIDE"
+    FederationCollectivityStats:
+      type: object
+      properties:
+        collectivityName:
+          type: string
+        globalAttendanceRate:
+          type: number
+          format: float
+          description: "Average attendance rate of all members in this collectivity"
+        membersUpToDatePercentage:
+          type: number
+          format: float
+          description: "Percentage of members who have fully paid their annual and monthly fees"
+        newAdherentsCount:
+          type: integer
+          description: "Number of new members joined during the specified period"
 
+    Account:
+      type: object
+      required: [type, balance, currency]
+      properties:
+        type:
+          type: string
+          enum: [CASH, BANK, MOBILE_MONEY]
+        balance:
+          type: number
+          example: 100000.0
+        currency:
+          type: string
+          default: "MGA"
+        details:
+          oneOf:
+            - $ref: '#/components/schemas/BankDetails'
+            - $ref: '#/components/schemas/MobileMoneyDetails'
 
+    BankDetails:
+      type: object
+      required: [bankName, holderName, accountNumber]
+      properties:
+        bankName:
+          type: string
+          enum: [BRED, MCB, BMOI, BOA, BGFI, AFG, ACCÈS BANQUE, BAOBAB, SIPEM]
+        holderName:
+          type: string
+        accountNumber:
+          type: string
+          pattern: '^[0-9]{23}$'
+          description: "Standardized 23-digit format (5 bank, 5 branch, 11 account, 2 key)"
 
+    MobileMoneyDetails:
+      type: object
+      required: [serviceName, holderName, phoneNumber]
+      properties:
+        serviceName:
+          type: string
+          enum: [Orange Money, Mvola, Airtel Money]
+        holderName:
+          type: string
+        phoneNumber:
+          type: string
+
+    Activity:
+      type: object
+      required: [ name, type, date, isMandatory ]
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [ GA_MONTHLY, JUNIOR_TRAINING, EXCEPTIONAL ]
+        date:
+          type: string
+          format: date-time
+        isMandatory:
+          type: boolean
+        targetAudience:
+          type: string
+          enum: [ ALL, JUNIORS_ONLY, SPECIFIC ]
+
+    AttendanceRecord:
+      type: object
+      required: [ memberId, status ]
+      properties:
+        memberId:
+          type: integer
+        status:
+          type: string
+          enum: [ PRESENT, ABSENT, EXCUSED ]
+        excuseReason:
+          type: string
+          description: "Required if status is EXCUSED"
+
+    MonthlyReport:
+      type: object
+      properties:
+        globalAttendanceRate:
+          type: number
+        totalMembers:
+          type: integer
+
+    MemberStats:
+      type: object
+      properties:
+        attendanceRate:
+          type: number
+        totalPaidMGA:
+          type: number
+        potentialDebtMGA:
+          type: number
 
 
 
