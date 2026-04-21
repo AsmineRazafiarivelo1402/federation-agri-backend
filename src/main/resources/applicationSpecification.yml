@@ -1,0 +1,270 @@
+openapi: 3.0.3
+info:
+  title: Federation Agri Backend API
+  description: |
+    Backend built with Spring Boot for a Malagasy agricultural federation.
+    This API enables efficient management of members, cooperatives (collectivités), 
+    and administrative processes (votes, mandates, and finances) through a 
+    scalable and well-structured REST architecture.
+  version: 0.1.0
+
+servers:
+  - url: http://localhost:8080
+    description: Serveur de développement local
+
+paths:
+  /collectivity/createNewCollectivity:
+    post:
+      description: Create a new collectivity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/collectivity"
+      responses:
+        "200":
+          description: Collectivity created successfully
+        "400":
+          description: Bad request - empty collectivity information
+  /member/AdmissionNewMember:
+    post:
+      summary: "Create new member"
+      description: |
+        Enregistre un nouveau membre dans une collectivité spécifique. 
+        Requiert un parrainage par un membre confirmé (ancienneté > 90 jours) 
+        et le règlement des frais d'adhésion de 50 000 MGA.
+      parameters:
+        - name: id
+          in: path
+          description: "ID THE COLLECTIVITY WANT TO ENTER"
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdmissionMembreRequest'
+      responses:
+        '201':
+          description: "Add successfully"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Membre'
+        '400':
+          description: "Personal Data incomplet or invalid"
+        '402':
+          description: "Paiement des frais d'adhésion (50 000 MGA) non confirmé"
+        '403':
+          description: "Parrainage invalide (parrain non confirmé ou ancienneté < 90 jours)"
+  /paiements/cotisations:
+    post:
+      summary: "registration membership fee"
+      description: |
+        Allows the community treasurer to record a membership fee paid by a member. 
+                In accordance with the rules, a record of the amount, date, and method of payment is kept.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CotisationRequest'
+      responses:
+        '201':
+          description: "registration membership fee added successfully"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '400':
+          description: "Invalid or missing payment information"
+        '404':
+          description: "Member not found"
+
+
+components:
+  schemas:
+    collectivity:
+      type: object
+      properties:
+        reference-number:
+          type: string
+        name:
+          type: string
+        ville:
+          type: string
+        speciality:
+          type: string
+        CreatedAt:
+          type: string
+        listMember:
+          type: object
+    AdmissionMembreRequest:
+      type: object
+      required:
+        - nom
+        - prenoms
+        - dateNaissance
+        - genre
+        - adresse
+        - metier
+        - telephone
+        - idParrain
+        - preuvePaiement
+      properties:
+        nom:
+          type: string
+          example: "Ranaivo"
+        prenoms:
+          type: string
+          example: "Jean Luc"
+        dateNaissance:
+          type: string
+          format: date
+        genre:
+          type: string
+          enum: [ MASCULIN, FEMININ ]
+        adresse:
+          type: string
+          example: "Lot II V 45 Analamahitsy"
+        metier:
+          type: string
+          example: "Rice productor"
+        telephone:
+          type: string
+          example: "+261340000000"
+        email:
+          type: string
+          format: email
+          example: "jean.luc@agri.mg"
+        parrains:
+          type: array
+          description: |
+            Liste des parrains (au moins 2 membres confirmés).
+            La règle : le nombre de parrains de la collectivité visée doit être ≥ au nombre de parrains des autres collectivités.
+          minItems: 2
+          items:
+            type: object
+            required:
+              - idMembreParrain
+              - collectiviteParrainId
+              - natureRelation
+            properties:
+              idMembreParrain:
+                type: integer
+                format: int64
+                description: "ID du membre parrain dans la fédération"
+                example: 1015
+              collectiviteParrainId:
+                type: integer
+                format: int64
+                description: "ID de la collectivité d'appartenance du parrain"
+                example: 1
+              natureRelation:
+                type: string
+                enum: [ famille, amis, collegues, professionnel, autre ]
+                description: "Nature de la relation entre le candidat et le parrain"
+                example: "amis"
+              precisionRelation:
+                type: string
+                description: "Précision libre sur la relation (si 'autre' ou pour plus de détails)"
+                example: "Voisin et ami d'enfance"
+                required: false
+        paiement:
+          type: object
+          required:
+            - fraisAdhesionRegle
+            - cotisationsAnnuellesReglees
+          properties:
+            fraisAdhesionRegle:
+              type: boolean
+              description: "Les frais d'adhésion de 50 000 Ar ont-ils été réglés ?"
+              example: true
+            montantFraisAdhesion:
+              type: integer
+              description: "Montant des frais d'adhésion (fixe : 50 000 Ar)"
+              example: 50000
+              readOnly: true
+            cotisationsAnnuellesReglees:
+              type: boolean
+              description: "Les cotisations annuelles obligatoires de la collectivité visée ont-elles été réglées ?"
+              example: true
+            montantCotisationsAnnuelles:
+              type: integer
+              description: "Montant des cotisations annuelles (variable selon la collectivité)"
+              example: 200000
+            referencePaiement:
+              type: string
+              description: "Référence du reçu ou du virement (optionnel mais recommandé)"
+              example: "REC-20260421-001"
+
+    Membre:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        dateAdhesion:
+          type: string
+          format: date
+        statut:
+          type: string
+          example: "MEMBRE_JUNIOR"
+
+    CotisationRequest:
+      type: object
+      required:
+        - membreId
+        - montant
+        - dateEncaissement
+        - typeCotisation
+        - modePaiement
+      properties:
+        membreId:
+          type: integer
+          format: int64
+          description: "Member ID of the person making the payment"
+        montant:
+          type: number
+          format: double
+          minimum: 0
+          description: "Amount paid in Ariary (MGA)"
+          example: 10000.00
+        dateEncaissement:
+          type: string
+          format: date-time
+          description: "date and time of payment"
+        typeCotisation:
+          type: string
+          enum: [ MENSUELLE, ANNUELLE, PONCTUELLE ]
+          description: "Type of payment (recurring or one-time)"
+        modePaiement:
+           type: string
+           enum: [ ESPECE, VIREMENT_BANCAIRE, MOBILE_MONEY ]
+           description: "Payment method used"
+
+    Transaction:
+      type: object
+      properties:
+        idTransaction:
+          type: string
+          format: uuid
+        referenceRecu:
+          type: string
+          description: "Reference number generated for mandatory record-keeping"
+        statut:
+          type: string
+          example: "VALIDE"
+
+
+
+
+
+
+
