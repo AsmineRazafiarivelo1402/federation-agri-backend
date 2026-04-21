@@ -115,8 +115,8 @@ components:
         - adresse
         - metier
         - telephone
-        - idParrain
-        - preuvePaiement
+        - parrains
+        - paiement
       properties:
         nom:
           type: string
