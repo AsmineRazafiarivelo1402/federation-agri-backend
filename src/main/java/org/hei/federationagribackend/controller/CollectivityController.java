@@ -11,7 +11,7 @@ import java.util.List;
 public class CollectivityController {
     @PostMapping("/collectivities")
     public List<CollectivityEntity> createCollectivities(){
-        throw new RuntimeException("Not implemented");
+        throw new RuntimeException("Not yet implemented");
     }
 
 }
