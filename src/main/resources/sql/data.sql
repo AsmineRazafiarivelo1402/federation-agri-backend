@@ -38,3 +38,5 @@ CREATE TABLE collectivity_structure (
                                         treasurer_id VARCHAR(255) REFERENCES member(id),
                                         secretary_id VARCHAR(255) REFERENCES member(id)
 );
+
+select * from member;

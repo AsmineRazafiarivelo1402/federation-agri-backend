@@ -6,10 +6,7 @@ import org.hei.federationagribackend.exception.BadRequestException;
 import org.hei.federationagribackend.exception.NotFoundException;
 import org.hei.federationagribackend.service.MemberService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -21,6 +18,10 @@ public class MemberController {
 
     public MemberController(MemberService memberService) {
         this.memberService = memberService;
+    }
+    @GetMapping("/hello")
+    public String hello(){
+        return "hello";
     }
 
     @PostMapping
@@ -37,7 +38,8 @@ public class MemberController {
             return ResponseEntity.status(404).body(e.getMessage());
 
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Internal error");
+            e.printStackTrace(); // 🔥 IMPORTANT
+            return ResponseEntity.status(500).body(e.getMessage());
         }
     }
 }

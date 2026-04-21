@@ -34,7 +34,13 @@ public class MemberRepository {
                 membership_dues_paid,
                 collectivity_id
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (
+                ?, ?, ?, ?, 
+                ?::gender,
+                ?, ?, ?, ?, 
+                ?::member_occupation,
+                ?, ?, ?
+            )
         """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -43,15 +49,26 @@ public class MemberRepository {
             ps.setString(2, m.getFirstName());
             ps.setString(3, m.getLastName());
             ps.setDate(4, Date.valueOf(m.getBirthDate()));
+
+            // 🔥 ENUM FIX
             ps.setString(5, m.getGender().name());
+
             ps.setString(6, m.getAddress());
             ps.setString(7, m.getProfession());
-            ps.setString(8, String.valueOf(m.getPhoneNumber())); // VARCHAR dans DB
+
+            // DB = VARCHAR(50)
+            ps.setString(8, String.valueOf(m.getPhoneNumber()));
+
             ps.setString(9, m.getEmail());
+
+            // 🔥 ENUM FIX
             ps.setString(10, m.getOccupation().name());
+
             ps.setBoolean(11, m.getRegistrationFeePaid());
             ps.setBoolean(12, m.getMembershipDuesPaid());
-            ps.setString(13, collectivityId); // 🔥 IMPORTANT
+
+            // FK collectivity
+            ps.setString(13, collectivityId);
 
             ps.executeUpdate();
 
@@ -81,12 +98,19 @@ public class MemberRepository {
             m.setFirstName(rs.getString("first_name"));
             m.setLastName(rs.getString("last_name"));
             m.setBirthDate(rs.getDate("birth_date").toLocalDate());
+
+            // 🔥 ENUM read
             m.setGender(Gender.valueOf(rs.getString("gender")));
+
             m.setAddress(rs.getString("address"));
             m.setProfession(rs.getString("profession"));
             m.setPhoneNumber(Integer.valueOf(rs.getString("phone_number")));
             m.setEmail(rs.getString("email"));
+
             m.setOccupation(MemberOccupation.valueOf(rs.getString("occupation")));
+
+            m.setRegistrationFeePaid(rs.getBoolean("registration_fee_paid"));
+            m.setMembershipDuesPaid(rs.getBoolean("membership_dues_paid"));
 
             return m;
 
