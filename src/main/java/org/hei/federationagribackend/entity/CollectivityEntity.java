@@ -11,7 +11,5 @@ public class CollectivityEntity {
 
     private List<MemberEntity> members = new ArrayList<>();
 
-
-    private List<String> memberIds = new ArrayList<>();
     private CollectivityStructure structure;
 }
