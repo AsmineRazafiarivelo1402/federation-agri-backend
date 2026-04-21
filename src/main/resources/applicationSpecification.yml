@@ -63,6 +63,29 @@ paths:
           description: "Paiement des frais d'adhésion (50 000 MGA) non confirmé"
         '403':
           description: "Parrainage invalide (parrain non confirmé ou ancienneté < 90 jours)"
+  /paiements/cotisations:
+    post:
+      summary: "registration membership fee"
+      description: |
+        Allows the community treasurer to record a membership fee paid by a member. 
+                In accordance with the rules, a record of the amount, date, and method of payment is kept.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CotisationRequest'
+      responses:
+        '201':
+          description: "registration membership fee added successfully"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '400':
+          description: "Invalid or missing payment information"
+        '404':
+          description: "Member not found"
 
 
 components:
@@ -113,7 +136,7 @@ components:
           example: "Lot II V 45 Analamahitsy"
         metier:
           type: string
-          example: "Producteur de Riz"
+          example: "Rice productor"
         telephone:
           type: string
           example: "+261340000000"
@@ -124,7 +147,7 @@ components:
         idParrain:
           type: integer
           format: int64
-          description: "ID du membre confirmé parrainant l'adhésion"
+          description: "Confirmed member ID of the person sponsoring the membership"
         preuvePaiement:
           type: object
           required: [ montant, modePaiement, referenceTransaction ]
@@ -138,7 +161,7 @@ components:
               enum: [ MOBILE_MONEY, VIREMENT_BANCAIRE ]
             referenceTransaction:
               type: string
-              description: "Référence du transfert Mvola/Orange Money ou virement"
+              description: "Mvola/Orange Money transfer reference or bank transfer"
 
     Membre:
       type: object
@@ -153,6 +176,50 @@ components:
           type: string
           example: "MEMBRE_JUNIOR"
 
+    CotisationRequest:
+      type: object
+      required:
+        - membreId
+        - montant
+        - dateEncaissement
+        - typeCotisation
+        - modePaiement
+      properties:
+        membreId:
+          type: integer
+          format: int64
+          description: "Member ID of the person making the payment"
+        montant:
+          type: number
+          format: double
+          minimum: 0
+          description: "Amount paid in Ariary (MGA)"
+          example: 10000.00
+        dateEncaissement:
+          type: string
+          format: date-time
+          description: "date and time of payment"
+        typeCotisation:
+          type: string
+          enum: [ MENSUELLE, ANNUELLE, PONCTUELLE ]
+          description: "Type of payment (recurring or one-time)"
+        modePaiement:
+           type: string
+           enum: [ ESPECE, VIREMENT_BANCAIRE, MOBILE_MONEY ]
+           description: "Payment method used"
+
+    Transaction:
+      type: object
+      properties:
+        idTransaction:
+          type: string
+          format: uuid
+        referenceRecu:
+          type: string
+          description: "Reference number generated for mandatory record-keeping"
+        statut:
+          type: string
+          example: "VALIDE"
 
 
 
