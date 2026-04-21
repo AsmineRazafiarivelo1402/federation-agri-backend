@@ -11,3 +11,152 @@ info:
 servers:
   - url: http://localhost:8080
     description: Serveur de développement local
+
+paths:
+  /collectivity/createNewCollectivity:
+    post:
+      description: Create a new collectivity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/collectivity"
+      responses:
+        "200":
+          description: Collectivity created successfully
+        "400":
+          description: Bad request - empty collectivity information
+  /member/createNewMember:
+    post:
+      summary: "Create new member"
+      description: |
+        Enregistre un nouveau membre dans une collectivité spécifique. 
+        Requiert un parrainage par un membre confirmé (ancienneté > 90 jours) 
+        et le règlement des frais d'adhésion de 50 000 MGA.
+      parameters:
+        - name: id
+          in: path
+          description: "ID THE COLLECTIVITY WANT TO ENTER"
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdmissionMembreRequest'
+      responses:
+        '201':
+          description: "Add successfully"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Membre'
+        '400':
+          description: "Personal Data incomplet or invalid"
+        '402':
+          description: "Paiement des frais d'adhésion (50 000 MGA) non confirmé"
+        '403':
+          description: "Parrainage invalide (parrain non confirmé ou ancienneté < 90 jours)"
+
+
+components:
+  schemas:
+    collectivity:
+      type: object
+      properties:
+        reference-number:
+          type: string
+        name:
+          type: string
+        ville:
+          type: string
+        speciality:
+          type: string
+        CreatedAt:
+          type: string
+        listMember:
+          type: object
+
+    AdmissionMembreRequest:
+      type: object
+      required:
+        - nom
+        - prenoms
+        - dateNaissance
+        - genre
+        - adresse
+        - metier
+        - telephone
+        - idParrain
+        - preuvePaiement
+      properties:
+        nom:
+          type: string
+          example: "Ranaivo"
+        prenoms:
+          type: string
+          example: "Jean Luc"
+        dateNaissance:
+          type: string
+          format: date
+        genre:
+          type: string
+          enum: [ MASCULIN, FEMININ ]
+        adresse:
+          type: string
+          example: "Lot II V 45 Analamahitsy"
+        metier:
+          type: string
+          example: "Producteur de Riz"
+        telephone:
+          type: string
+          example: "+261340000000"
+        email:
+          type: string
+          format: email
+          example: "jean.luc@agri.mg"
+        idParrain:
+          type: integer
+          format: int64
+          description: "ID du membre confirmé parrainant l'adhésion"
+        preuvePaiement:
+          type: object
+          required: [ montant, modePaiement, referenceTransaction ]
+          properties:
+            montant:
+              type: number
+              minimum: 50000
+              example: 50000
+            modePaiement:
+              type: string
+              enum: [ MOBILE_MONEY, VIREMENT_BANCAIRE ]
+            referenceTransaction:
+              type: string
+              description: "Référence du transfert Mvola/Orange Money ou virement"
+
+    Membre:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        dateAdhesion:
+          type: string
+          format: date
+        statut:
+          type: string
+          example: "MEMBRE_JUNIOR"
+
+
+
+
+
+
+
+
