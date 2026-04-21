@@ -9,9 +9,9 @@ import java.util.List;
 
 @RestController
 public class CollectivityController {
-    PostMapping("/collectivities")
+    @PostMapping("/collectivities")
     public List<CollectivityEntity> createCollectivities(){
-
+        throw new RuntimeException("Not implemented");
     }
 
 }
