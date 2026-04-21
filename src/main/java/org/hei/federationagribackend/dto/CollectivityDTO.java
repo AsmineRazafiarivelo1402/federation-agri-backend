@@ -9,4 +9,5 @@ public class CollectivityDTO {
 
     private List<MemberDTO> members;
     private CollectivityStructureDTO structure;
+
 }
