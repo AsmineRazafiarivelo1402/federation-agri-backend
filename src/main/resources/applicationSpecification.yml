@@ -87,6 +87,34 @@ paths:
         '404':
           description: "Member not found"
 
+  /federation/reports:
+    get:
+      summary: "Get global federation monthly/annual report"
+      description: "Aggregates data from all collectivities to rank performance based on attendance, financial health, and growth."
+
+      parameters:
+        - name: startDate
+          in: query
+          required: true
+          schema:
+           type: string
+           format: date
+        - name: endDate
+          in: query
+          required: true
+          schema:
+           type: string
+           format: date
+      responses:
+        '200':
+          description: "Global report generated successfully"
+          content:
+            application/json:
+              schema:
+               type: array
+               items:
+                 $ref: '#/components/schemas/FederationCollectivityStats'
+
 
 components:
   schemas:
@@ -261,7 +289,22 @@ components:
         statut:
           type: string
           example: "VALIDE"
-
+    FederationCollectivityStats:
+      type: object
+      properties:
+        collectivityName:
+          type: string
+        globalAttendanceRate:
+          type: number
+          format: float
+          description: "Average attendance rate of all members in this collectivity"
+        membersUpToDatePercentage:
+          type: number
+          format: float
+          description: "Percentage of members who have fully paid their annual and monthly fees"
+        newAdherentsCount:
+          type: integer
+          description: "Number of new members joined during the specified period"
 
 
 
