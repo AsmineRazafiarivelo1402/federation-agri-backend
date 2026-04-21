@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class MemberService {
@@ -26,7 +27,7 @@ public class MemberService {
 
         for (CreateMemberDTO dto : requests) {
 
-            // ❌ 400
+            // ❌ 400 validation
             if (!Boolean.TRUE.equals(dto.getRegistrationFeePaid())
                     || !Boolean.TRUE.equals(dto.getMembershipDuesPaid())) {
                 throw new BadRequestException("Payment not completed");
@@ -35,8 +36,11 @@ public class MemberService {
             // DTO → ENTITY
             MemberEntity entity = MemberMapper.toEntity(dto);
 
-            // SAVE
-            entity = memberRepository.save(entity);
+            // ID généré côté backend
+            entity.setId(UUID.randomUUID().toString());
+
+            // SAVE avec collectivity_id
+            entity = memberRepository.save(entity, dto.getCollectivityIdentifier());
 
             // REFEREES
             List<MemberEntity> referees = new ArrayList<>();

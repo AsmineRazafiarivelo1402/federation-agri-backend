@@ -7,7 +7,6 @@ import org.hei.federationagribackend.exception.NotFoundException;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
-
 @Repository
 public class MemberRepository {
 
@@ -17,35 +16,44 @@ public class MemberRepository {
         this.connection = connection;
     }
 
-    public MemberEntity save(MemberEntity m) {
+    public MemberEntity save(MemberEntity m, String collectivityId) {
+
         String sql = """
             INSERT INTO member (
-                first_name, last_name, birth_date, gender,
-                address, profession, phone_number, email,
-                occupation, registration_fee_paid, membership_dues_paid
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                id,
+                first_name,
+                last_name,
+                birth_date,
+                gender,
+                address,
+                profession,
+                phone_number,
+                email,
+                occupation,
+                registration_fee_paid,
+                membership_dues_paid,
+                collectivity_id
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """;
 
-        try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
-            ps.setString(1, m.getFirstName());
-            ps.setString(2, m.getLastName());
-            ps.setDate(3, Date.valueOf(m.getBirthDate()));
-            ps.setString(4, m.getGender().name());
-            ps.setString(5, m.getAddress());
-            ps.setString(6, m.getProfession());
-            ps.setInt(7, m.getPhoneNumber());
-            ps.setString(8, m.getEmail());
-            ps.setString(9, m.getOccupation().name());
-            ps.setBoolean(10, m.getRegistrationFeePaid());
-            ps.setBoolean(11, m.getMembershipDuesPaid());
+            ps.setString(1, m.getId());
+            ps.setString(2, m.getFirstName());
+            ps.setString(3, m.getLastName());
+            ps.setDate(4, Date.valueOf(m.getBirthDate()));
+            ps.setString(5, m.getGender().name());
+            ps.setString(6, m.getAddress());
+            ps.setString(7, m.getProfession());
+            ps.setString(8, String.valueOf(m.getPhoneNumber())); // VARCHAR dans DB
+            ps.setString(9, m.getEmail());
+            ps.setString(10, m.getOccupation().name());
+            ps.setBoolean(11, m.getRegistrationFeePaid());
+            ps.setBoolean(12, m.getMembershipDuesPaid());
+            ps.setString(13, collectivityId); // 🔥 IMPORTANT
 
             ps.executeUpdate();
-
-            ResultSet rs = ps.getGeneratedKeys();
-            if (rs.next()) {
-                m.setId(rs.getString(1));
-            }
 
             return m;
 
@@ -55,6 +63,7 @@ public class MemberRepository {
     }
 
     public MemberEntity findById(String id) {
+
         String sql = "SELECT * FROM member WHERE id = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -75,7 +84,7 @@ public class MemberRepository {
             m.setGender(Gender.valueOf(rs.getString("gender")));
             m.setAddress(rs.getString("address"));
             m.setProfession(rs.getString("profession"));
-            m.setPhoneNumber(rs.getInt("phone_number"));
+            m.setPhoneNumber(Integer.valueOf(rs.getString("phone_number")));
             m.setEmail(rs.getString("email"));
             m.setOccupation(MemberOccupation.valueOf(rs.getString("occupation")));
 
