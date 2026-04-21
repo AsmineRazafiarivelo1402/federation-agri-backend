@@ -29,7 +29,7 @@ paths:
           description: Collectivity created successfully
         "400":
           description: Bad request - empty collectivity information
-  /member/createNewMember:
+  /member/AdmissionNewMember:
     post:
       summary: "Create new member"
       description: |
@@ -105,7 +105,6 @@ components:
           type: string
         listMember:
           type: object
-
     AdmissionMembreRequest:
       type: object
       required:
@@ -144,24 +143,66 @@ components:
           type: string
           format: email
           example: "jean.luc@agri.mg"
-        idParrain:
-          type: integer
-          format: int64
-          description: "Confirmed member ID of the person sponsoring the membership"
-        preuvePaiement:
+        parrains:
+          type: array
+          description: |
+            Liste des parrains (au moins 2 membres confirmés).
+            La règle : le nombre de parrains de la collectivité visée doit être ≥ au nombre de parrains des autres collectivités.
+          minItems: 2
+          items:
+            type: object
+            required:
+              - idMembreParrain
+              - collectiviteParrainId
+              - natureRelation
+            properties:
+              idMembreParrain:
+                type: integer
+                format: int64
+                description: "ID du membre parrain dans la fédération"
+                example: 1015
+              collectiviteParrainId:
+                type: integer
+                format: int64
+                description: "ID de la collectivité d'appartenance du parrain"
+                example: 1
+              natureRelation:
+                type: string
+                enum: [ famille, amis, collegues, professionnel, autre ]
+                description: "Nature de la relation entre le candidat et le parrain"
+                example: "amis"
+              precisionRelation:
+                type: string
+                description: "Précision libre sur la relation (si 'autre' ou pour plus de détails)"
+                example: "Voisin et ami d'enfance"
+                required: false
+        paiement:
           type: object
-          required: [ montant, modePaiement, referenceTransaction ]
+          required:
+            - fraisAdhesionRegle
+            - cotisationsAnnuellesReglees
           properties:
-            montant:
-              type: number
-              minimum: 50000
+            fraisAdhesionRegle:
+              type: boolean
+              description: "Les frais d'adhésion de 50 000 Ar ont-ils été réglés ?"
+              example: true
+            montantFraisAdhesion:
+              type: integer
+              description: "Montant des frais d'adhésion (fixe : 50 000 Ar)"
               example: 50000
-            modePaiement:
+              readOnly: true
+            cotisationsAnnuellesReglees:
+              type: boolean
+              description: "Les cotisations annuelles obligatoires de la collectivité visée ont-elles été réglées ?"
+              example: true
+            montantCotisationsAnnuelles:
+              type: integer
+              description: "Montant des cotisations annuelles (variable selon la collectivité)"
+              example: 200000
+            referencePaiement:
               type: string
-              enum: [ MOBILE_MONEY, VIREMENT_BANCAIRE ]
-            referenceTransaction:
-              type: string
-              description: "Mvola/Orange Money transfer reference or bank transfer"
+              description: "Référence du reçu ou du virement (optionnel mais recommandé)"
+              example: "REC-20260421-001"
 
     Membre:
       type: object
