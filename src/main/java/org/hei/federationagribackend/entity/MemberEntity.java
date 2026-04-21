@@ -14,7 +14,6 @@ public class MemberEntity {
     private String email;
     private String memberIdentifier;
     private MemberOccupation occupation;
-    private String collectivityIdentifier;
     private Boolean registrationFeePaid;
     private Boolean membershipDuesPaid;
 }
