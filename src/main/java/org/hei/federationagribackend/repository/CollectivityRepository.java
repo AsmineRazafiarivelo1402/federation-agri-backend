@@ -101,7 +101,6 @@ public class CollectivityRepository {
             c.setLocation(rs.getString("location"));
             c.setFederationApproval(rs.getBoolean("federation_approval"));
 
-            // ✅ CORRECTION ICI
             c.setName(rs.getString("name"));
             c.setNumber(rs.getString("registration_number"));
 

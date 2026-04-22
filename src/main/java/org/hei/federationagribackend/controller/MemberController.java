@@ -38,7 +38,7 @@ public class MemberController {
             return ResponseEntity.status(404).body(e.getMessage());
 
         } catch (Exception e) {
-            e.printStackTrace(); // 🔥 IMPORTANT
+            e.printStackTrace();
             return ResponseEntity.status(500).body(e.getMessage());
         }
     }

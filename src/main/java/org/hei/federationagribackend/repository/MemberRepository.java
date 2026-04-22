@@ -64,7 +64,6 @@ public class MemberRepository {
             ps.setBoolean(11, m.getRegistrationFeePaid());
             ps.setBoolean(12, m.getMembershipDuesPaid());
 
-            // FK collectivity
             ps.setString(13, collectivityId);
 
             ps.executeUpdate();
@@ -96,7 +95,6 @@ public class MemberRepository {
             m.setLastName(rs.getString("last_name"));
             m.setBirthDate(rs.getDate("birth_date").toLocalDate());
 
-            // 🔥 ENUM read
             m.setGender(Gender.valueOf(rs.getString("gender")));
 
             m.setAddress(rs.getString("address"));

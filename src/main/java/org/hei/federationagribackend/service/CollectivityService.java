@@ -33,7 +33,6 @@ public class CollectivityService {
 
         for (CreateCollectivityDTO dto : dtos) {
 
-            // 🔥 VALIDATIONS OBLIGATOIRES
             if (dto.getLocation() == null || dto.getLocation().isBlank()) {
                 throw new RuntimeException("Location is required");
             }
@@ -46,16 +45,13 @@ public class CollectivityService {
                 throw new RuntimeException("Structure is required");
             }
 
-            // 🔥 CREATE ENTITY
             CollectivityEntity c = new CollectivityEntity();
             c.setId(UUID.randomUUID().toString());
             c.setLocation(dto.getLocation());
             c.setFederationApproval(dto.getFederationApproval());
 
-            // save collectivity
             repository.save(c);
 
-            // members
             List<MemberEntity> members = new ArrayList<>();
 
             for (String memberId : dto.getMembers()) {
@@ -73,7 +69,6 @@ public class CollectivityService {
 
             c.setMembers(members);
 
-            // structure validation
             CreateCollectivityStructureDTO s = dto.getStructure();
 
             if (s.getPresident() == null ||
