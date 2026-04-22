@@ -154,4 +154,6 @@ public class CollectivityRepository {
             throw new RuntimeException(e);
         }
     }
+
+
 }
