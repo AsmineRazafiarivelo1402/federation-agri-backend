@@ -35,7 +35,6 @@ paths:
           description: Collectivity without federation approval or structure missing.
         404:
           description: Member not found.
-
   '/members':
     post:
       summary: Create list of members
@@ -62,7 +61,6 @@ paths:
             - Membership dues not paid or registration fee not paid.
         404:
           description: Either collectivity or member not found.
-
   /collectivities/{id}/identity:
     patch:
       summary: Assign name and number to a collectivity

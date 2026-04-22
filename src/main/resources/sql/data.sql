@@ -43,3 +43,27 @@ ALTER TABLE collectivity
     ADD COLUMN registration_number VARCHAR(50) UNIQUE,
 ADD COLUMN name VARCHAR(255) UNIQUE;
 
+CREATE TYPE frequency_type AS ENUM (
+    'WEEKLY',
+    'MONTHLY',
+    'ANNUALLY',
+    'PUNCTUALLY'
+    );
+
+CREATE TYPE activity_status_type AS ENUM (
+    'ACTIVE',
+    'INACTIVE'
+    );
+
+CREATE TABLE membership_fee (
+                                id VARCHAR(255) PRIMARY KEY,
+                                label VARCHAR(255) NOT NULL,
+                                amount NUMERIC(15, 2) NOT NULL CHECK (amount >= 0),
+                                frequency frequency_type NOT NULL,
+                                status activity_status_type DEFAULT 'ACTIVE',
+                                eligible_from DATE NOT NULL,
+                                collectivity_id VARCHAR(255) NOT NULL,
+                                CONSTRAINT fk_fee_collectivity
+                                    FOREIGN KEY (collectivity_id)
+                                        REFERENCES collectivity(id)
+);
