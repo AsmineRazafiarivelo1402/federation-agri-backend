@@ -106,5 +106,26 @@ CREATE TABLE bank_account (
                               bank_account_key INTEGER NOT NULL,
                               CONSTRAINT fk_bank_main FOREIGN KEY (id) REFERENCES financial_account(id) ON DELETE CASCADE
 );
+CREATE TABLE collectivity_transaction (
+                                          id VARCHAR(255) PRIMARY KEY,
+                                          creation_date DATE NOT NULL,
+                                          amount NUMERIC(15,2) NOT NULL,
+                                          payment_mode VARCHAR(50) NOT NULL,
+
+                                          account_id VARCHAR(255) NOT NULL,
+                                          member_id VARCHAR(255) NOT NULL,
+                                          collectivity_id VARCHAR(255) NOT NULL,
+
+                                          CONSTRAINT fk_transaction_account
+                                              FOREIGN KEY (account_id) REFERENCES financial_account(id),
+
+                                          CONSTRAINT fk_transaction_member
+                                              FOREIGN KEY (member_id) REFERENCES member(id),
+
+                                          CONSTRAINT fk_transaction_collectivity
+                                              FOREIGN KEY (collectivity_id) REFERENCES collectivity(id)
+);
+ALTER TABLE collectivity_transaction
+    ADD COLUMN member_debited_id VARCHAR(255);
 
 CREATE TYPE payment_mode_enum AS ENUM ('CASH', 'MOBILE_BANKING', 'BANK_TRANSFER');
