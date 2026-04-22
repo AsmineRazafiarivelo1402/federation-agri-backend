@@ -1,5 +1,6 @@
 package org.hei.federationagribackend.service;
 
+import org.hei.federationagribackend.dto.AssignCollectivityIdentityDTO;
 import org.hei.federationagribackend.dto.CreateCollectivityDTO;
 import org.hei.federationagribackend.dto.CreateCollectivityStructureDTO;
 import org.hei.federationagribackend.entity.CollectivityEntity;
@@ -102,5 +103,36 @@ public class CollectivityService {
         }
 
         return result;
+    }
+    public CollectivityEntity assignIdentity(String id, AssignCollectivityIdentityDTO dto) {
+
+
+        CollectivityEntity c = repository.findById(id);
+        if (c == null) {
+            throw new RuntimeException("Collectivity not found");
+        }
+
+
+        if (dto.getName() == null || dto.getName().isBlank()) {
+            throw new RuntimeException("Invalid name");
+        }
+
+        if (dto.getNumber() == null || dto.getNumber().isBlank()) {
+            throw new RuntimeException("Invalid number");
+        }
+
+
+        if (repository.existsByName(dto.getName())) {
+            throw new RuntimeException("Name already exists");
+        }
+
+        if (repository.existsByNumber(dto.getNumber())) {
+            throw new RuntimeException("Number already exists");
+        }
+
+
+        repository.updateIdentity(id, dto.getName(), dto.getNumber());
+
+        return repository.findById(id);
     }
 }

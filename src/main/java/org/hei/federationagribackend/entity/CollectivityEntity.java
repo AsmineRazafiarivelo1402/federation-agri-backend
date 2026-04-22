@@ -24,6 +24,8 @@ public class CollectivityEntity {
         this.members = members;
         this.structure = structure;
     }
+    private String name;
+    private String number;
 
     public String getId() {
         return id;
@@ -63,6 +65,22 @@ public class CollectivityEntity {
 
     public void setStructure(CollectivityStructure structure) {
         this.structure = structure;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getNumber() {
+        return number;
+    }
+
+    public void setNumber(String number) {
+        this.number = number;
     }
 
     @Override

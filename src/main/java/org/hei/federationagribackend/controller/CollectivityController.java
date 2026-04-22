@@ -1,5 +1,6 @@
 package org.hei.federationagribackend.controller;
 
+import org.hei.federationagribackend.dto.AssignCollectivityIdentityDTO;
 import org.hei.federationagribackend.dto.CreateCollectivityDTO;
 import org.hei.federationagribackend.entity.CollectivityEntity;
 import org.hei.federationagribackend.service.CollectivityService;
@@ -27,6 +28,25 @@ public class CollectivityController {
             return ResponseEntity.status(201).body(result);
 
         } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
+    }
+    @PatchMapping("/{id}/identity")
+    public ResponseEntity<?> assignIdentity(
+            @PathVariable String id,
+            @RequestBody AssignCollectivityIdentityDTO dto
+    ) {
+
+        try {
+            CollectivityEntity result = service.assignIdentity(id, dto);
+            return ResponseEntity.ok(result);
+
+        } catch (RuntimeException e) {
+
+            if (e.getMessage().contains("not found")) {
+                return ResponseEntity.status(404).body(e.getMessage());
+            }
+
             return ResponseEntity.status(400).body(e.getMessage());
         }
     }

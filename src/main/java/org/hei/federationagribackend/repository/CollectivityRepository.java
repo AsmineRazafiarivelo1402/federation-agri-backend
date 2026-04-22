@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @Repository
@@ -78,6 +79,74 @@ public class CollectivityRepository {
 
             ps.setString(1, collectivityId);
             ps.setString(2, memberId);
+
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public CollectivityEntity findById(String id) {
+        String sql = "SELECT * FROM collectivity WHERE id = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setString(1, id);
+            ResultSet rs = ps.executeQuery();
+
+            if (!rs.next()) return null;
+
+            CollectivityEntity c = new CollectivityEntity();
+            c.setId(rs.getString("id"));
+            c.setLocation(rs.getString("location"));
+            c.setFederationApproval(rs.getBoolean("federation_approval"));
+
+            // ✅ CORRECTION ICI
+            c.setName(rs.getString("name"));
+            c.setNumber(rs.getString("registration_number"));
+
+            return c;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean existsByName(String name) {
+        String sql = "SELECT 1 FROM collectivity WHERE name = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, name);
+            return ps.executeQuery().next();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean existsByNumber(String number) {
+        String sql = "SELECT 1 FROM collectivity WHERE registration_number = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, number);
+            return ps.executeQuery().next();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void updateIdentity(String id, String name, String number) {
+
+        String sql = """
+        UPDATE collectivity
+        SET name = ?, registration_number = ?
+        WHERE id = ?
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setString(1, name);
+            ps.setString(2, number);
+            ps.setString(3, id);
 
             ps.executeUpdate();
 
