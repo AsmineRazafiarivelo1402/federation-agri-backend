@@ -27,22 +27,17 @@ public class MemberService {
 
         for (CreateMemberDTO dto : requests) {
 
-            // ❌ 400 validation
             if (!Boolean.TRUE.equals(dto.getRegistrationFeePaid())
                     || !Boolean.TRUE.equals(dto.getMembershipDuesPaid())) {
                 throw new BadRequestException("Payment not completed");
             }
 
-            // DTO → ENTITY
             MemberEntity entity = MemberMapper.toEntity(dto);
 
-            // ID généré côté backend
             entity.setId(UUID.randomUUID().toString());
 
-            // SAVE avec collectivity_id
             entity = memberRepository.save(entity, dto.getCollectivityIdentifier());
 
-            // REFEREES
             List<MemberEntity> referees = new ArrayList<>();
 
             if (dto.getReferees() != null) {

@@ -50,18 +50,15 @@ public class MemberRepository {
             ps.setString(3, m.getLastName());
             ps.setDate(4, Date.valueOf(m.getBirthDate()));
 
-            // 🔥 ENUM FIX
             ps.setString(5, m.getGender().name());
 
             ps.setString(6, m.getAddress());
             ps.setString(7, m.getProfession());
 
-            // DB = VARCHAR(50)
             ps.setString(8, String.valueOf(m.getPhoneNumber()));
 
             ps.setString(9, m.getEmail());
 
-            // 🔥 ENUM FIX
             ps.setString(10, m.getOccupation().name());
 
             ps.setBoolean(11, m.getRegistrationFeePaid());

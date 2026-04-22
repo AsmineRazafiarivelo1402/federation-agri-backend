@@ -6,7 +6,6 @@ import org.hei.federationagribackend.entity.MemberEntity;
 
 public class MemberMapper {
 
-    // DTO → Entity
     public static MemberEntity toEntity(CreateMemberDTO dto) {
         MemberEntity entity = new MemberEntity();
 
@@ -25,7 +24,6 @@ public class MemberMapper {
         return entity;
     }
 
-    // Entity → DTO
     public static MemberDTO toDTO(MemberEntity entity) {
         MemberDTO dto = new MemberDTO();
 
