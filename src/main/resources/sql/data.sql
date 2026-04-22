@@ -41,6 +41,6 @@ CREATE TABLE collectivity_structure (
 
 ALTER TABLE collectivity
     ADD COLUMN registration_number VARCHAR(50) UNIQUE,
-ADD COLUMN unique_name VARCHAR(255) UNIQUE;
+ADD COLUMN name VARCHAR(255) UNIQUE;
 
 select * from member;
