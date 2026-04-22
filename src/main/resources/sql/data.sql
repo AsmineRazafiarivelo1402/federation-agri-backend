@@ -38,3 +38,9 @@ CREATE TABLE collectivity_structure (
                                         treasurer_id VARCHAR(255) REFERENCES member(id),
                                         secretary_id VARCHAR(255) REFERENCES member(id)
 );
+
+ALTER TABLE collectivity
+    ADD COLUMN registration_number VARCHAR(50) UNIQUE,
+ADD COLUMN name VARCHAR(255) UNIQUE;
+
+select * from member;
