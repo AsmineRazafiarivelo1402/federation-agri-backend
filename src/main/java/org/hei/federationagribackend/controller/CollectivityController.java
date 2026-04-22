@@ -50,10 +50,5 @@ public class CollectivityController {
             return ResponseEntity.status(400).body(e.getMessage());
         }
     }
-    @GetMapping("/{id}/membershipFees")
-    public  ResponseEntity<?> get(
-            @PathVariable String id
-    ){
-        throw new RuntimeException("Getter not yet Implemented");
-    }
+
 }
