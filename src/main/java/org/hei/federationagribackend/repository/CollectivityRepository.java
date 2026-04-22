@@ -86,6 +86,7 @@ public class CollectivityRepository {
             throw new RuntimeException(e);
         }
     }
+
     public CollectivityEntity findById(String id) {
         String sql = "SELECT * FROM collectivity WHERE id = ?";
 
