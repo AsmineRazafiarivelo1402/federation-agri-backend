@@ -61,6 +61,37 @@ paths:
             - Membership dues not paid or registration fee not paid.
         404:
           description: Either collectivity or member not found.
+  /collectivities/{id}/identity:
+    patch:
+      summary: Assign name and number to a collectivity
+      description: |
+        This endpoint allows the federation to assign a unique name and number
+        to an existing collectivity. The name must be unique across all collectivities.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignCollectivityIdentity'
+      responses:
+        200:
+          description: Collectivity identity successfully assigned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collectivity'
+        400:
+          description: Name already exists or invalid data
+        404:
+          description: Collectivity not found
+
+
 components:
   schemas:
     CreateCollectivity:
@@ -112,6 +143,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Member'
+        name:
+          type: string
+        registration-number:
+          type: string
     MemberIdentifier:
       type: string
     CreateMember:
@@ -176,3 +211,10 @@ components:
         - TREASURER
         - VICE_PRESIDENT
         - PRESIDENT
+    AssignCollectivityIdentity:
+      type: object
+      properties:
+        name:
+          type: string
+        registration-number:
+          type: string
