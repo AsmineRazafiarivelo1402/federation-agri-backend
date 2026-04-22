@@ -331,6 +331,7 @@ components:
           type: string
         status:
           $ref: '#/components/schemas/ActivityStatus'
+
     CreateMemberPayment:
       type: object
       properties:

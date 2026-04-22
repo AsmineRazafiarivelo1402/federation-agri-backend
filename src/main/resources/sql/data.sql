@@ -106,3 +106,5 @@ CREATE TABLE bank_account (
                               bank_account_key INTEGER NOT NULL,
                               CONSTRAINT fk_bank_main FOREIGN KEY (id) REFERENCES financial_account(id) ON DELETE CASCADE
 );
+
+CREATE TYPE payment_mode_enum AS ENUM ('CASH', 'MOBILE_BANKING', 'BANK_TRANSFER');
