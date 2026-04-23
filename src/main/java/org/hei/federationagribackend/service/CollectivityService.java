@@ -1,8 +1,6 @@
 package org.hei.federationagribackend.service;
 
-import org.hei.federationagribackend.dto.AssignCollectivityIdentityDTO;
-import org.hei.federationagribackend.dto.CreateCollectivityDTO;
-import org.hei.federationagribackend.dto.CreateCollectivityStructureDTO;
+import org.hei.federationagribackend.dto.*;
 import org.hei.federationagribackend.entity.CollectivityEntity;
 import org.hei.federationagribackend.entity.CollectivityStructure;
 import org.hei.federationagribackend.entity.MemberEntity;
@@ -10,6 +8,8 @@ import org.hei.federationagribackend.repository.CollectivityRepository;
 import org.hei.federationagribackend.repository.MemberRepository;
 import org.springframework.stereotype.Service;
 
+
+import java.lang.reflect.Member;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -129,5 +129,61 @@ public class CollectivityService {
         repository.updateIdentity(id, dto.getName(), dto.getNumber());
 
         return repository.findById(id);
+    }
+    public CollectivityDTO getCollectivityById(String id) {
+
+        CollectivityEntity entity = repository.findCollectivityById(id);
+
+        if (entity == null) {
+            throw new RuntimeException("Collectivity not found");
+        }
+
+        CollectivityDTO dto = new CollectivityDTO();
+
+        dto.setId(entity.getId());
+        dto.setName(entity.getName());
+        dto.setNumber(entity.getNumber());
+        dto.setLocation(entity.getLocation());
+
+        dto.setStructure(mapStructure(entity.getStructure()));
+
+        return dto;
+    }
+    private MemberDTO mapMember(String memberId) {
+
+        MemberEntity m = memberRepository.findById(memberId);
+
+        if (m == null) return null;
+
+        MemberDTO dto = new MemberDTO();
+
+        dto.setId(m.getId());
+        dto.setFirstName(m.getFirstName());
+        dto.setLastName(m.getLastName());
+
+        dto.setBirthDate(m.getBirthDate());
+        dto.setGender(m.getGender());
+        dto.setAddress(m.getAddress());
+        dto.setProfession(m.getProfession());
+        dto.setPhoneNumber(m.getPhoneNumber());
+        dto.setEmail(m.getEmail());
+        dto.setOccupation(m.getOccupation());
+
+        return dto;
+    }
+    private CollectivityStructureDTO mapStructure(CollectivityStructure structure) {
+
+        if (structure == null) {
+            return null;
+        }
+
+        CollectivityStructureDTO dto = new CollectivityStructureDTO();
+
+        dto.setPresident(mapMember(structure.getPresidentId()));
+        dto.setVicePresident(mapMember(structure.getVicePresidentId()));
+        dto.setTreasurer(mapMember(structure.getTreasurerId()));
+        dto.setSecretary(mapMember(structure.getSecretaryId()));
+
+        return dto;
     }
 }

@@ -154,6 +154,61 @@ public class CollectivityRepository {
             throw new RuntimeException(e);
         }
     }
+    public CollectivityEntity findCollectivityById(String id) {
+
+        String sql = """
+        SELECT id, name, registration_number, location
+        FROM collectivity
+        WHERE id = ?
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setString(1, id.trim());
+            ResultSet rs = ps.executeQuery();
+
+            if (!rs.next()) return null;
+
+            CollectivityEntity c = new CollectivityEntity();
+            c.setId(rs.getString("id"));
+            c.setName(rs.getString("name"));
+            c.setNumber(rs.getString("registration_number"));
+            c.setLocation(rs.getString("location"));
+
+            return c;
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private CollectivityStructure findStructure(String collectivityId) {
+
+        String sql = """
+            SELECT president_id, vice_president_id, treasurer_id, secretary_id
+            FROM collectivity_structure
+            WHERE collectivity_id = ?
+        """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setString(1, collectivityId);
+            ResultSet rs = ps.executeQuery();
+
+            if (!rs.next()) return null;
+
+            CollectivityStructure s = new CollectivityStructure();
+            s.setPresidentId(rs.getString("president_id"));
+            s.setVicePresidentId(rs.getString("vice_president_id"));
+            s.setTreasurerId(rs.getString("treasurer_id"));
+            s.setSecretaryId(rs.getString("secretary_id"));
+
+            return s;
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 
 

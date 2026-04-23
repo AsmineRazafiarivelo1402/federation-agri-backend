@@ -50,5 +50,13 @@ public class CollectivityController {
             return ResponseEntity.status(400).body(e.getMessage());
         }
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getCollectivity(@PathVariable String id) {
+        try {
+            return ResponseEntity.ok(service.getCollectivityById(id));
+        } catch (Exception e) {
+            return ResponseEntity.status(404).body("Collectivity not found");
+        }
+    }
 
 }
