@@ -50,7 +50,7 @@ public class MemberShipFeeRepository {
     }
 
     public List<MemberShipFeeEntity> findByCollectivityId(String collectivityId) {
-        String sql = "SELECT * FROM membership_fee WHERE collectivity_id = ?";
+        String sql = "SELECT id, label, amount, frequency, status, eligible_from, collectivity_id FROM membership_fee WHERE collectivity_id = ?";
 
         List<MemberShipFeeEntity> list = new ArrayList<>();
 

@@ -77,7 +77,18 @@ public class MemberRepository {
 
     public MemberEntity findById(String id) {
 
-        String sql = "SELECT * FROM member WHERE id = ?";
+        String sql = "SELECT     id,\n" +
+                "                first_name,\n" +
+                "                last_name,\n" +
+                "                birth_date,\n" +
+                "                gender,\n" +
+                "                address,\n" +
+                "                profession,\n" +
+                "                phone_number,\n" +
+                "                email,\n" +
+                "                occupation,\n" +
+                "                registration_fee_paid,\n" +
+                "                membership_dues_paid FROM member WHERE id = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
 

@@ -88,7 +88,7 @@ public class CollectivityRepository {
     }
 
     public CollectivityEntity findById(String id) {
-        String sql = "SELECT * FROM collectivity WHERE id = ?";
+        String sql = "SELECT id, location, federation_approval FROM collectivity WHERE id = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
@@ -154,6 +154,7 @@ public class CollectivityRepository {
             throw new RuntimeException(e);
         }
     }
+
 
 
 }
