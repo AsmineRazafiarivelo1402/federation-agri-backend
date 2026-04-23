@@ -1,7 +1,6 @@
 package org.hei.federationagribackend.repository;
-import org.hei.federationagribackend.entity.AccountType;
-import org.hei.federationagribackend.entity.CollectivityTransactionEntity;
-import org.hei.federationagribackend.entity.PaymentMode;
+import org.hei.federationagribackend.Interface.FinancialAccount;
+import org.hei.federationagribackend.entity.*;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
@@ -68,6 +67,72 @@ public class CollectivityTransactionRepository {
                 e.setAccountType(AccountType.valueOf(rs.getString("account_type")));
 
                 result.add(e);
+            }
+        }
+
+        return result;
+    }
+    public List<FinancialAccount> findAccountsByCollectivityAndDate(
+            String collectivityId,
+            LocalDate at
+    ) throws Exception {
+
+        String sql = """
+        SELECT fa.id,
+               fa.account_type,
+               COALESCE(SUM(ct.amount), 0) as amount
+        FROM financial_account fa
+        LEFT JOIN collectivity_transaction ct 
+          ON fa.id = ct.account_id
+        WHERE fa.collectivity_id = ?
+          AND (ct.creation_date <= ? OR ct.creation_date IS NULL)
+        GROUP BY fa.id, fa.account_type
+    """;
+
+        List<FinancialAccount> result = new ArrayList<>();
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setString(1, collectivityId);
+            ps.setDate(2, Date.valueOf(at));
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+
+                String id = rs.getString("id");
+                AccountType accountType = AccountType.valueOf(rs.getString("account_type"));
+                double amount = rs.getDouble("amount");
+
+                FinancialAccount account;
+
+                // 🔥 EXACTEMENT comme ton autre méthode (mapping simple)
+                if (accountType == AccountType.CASH) {
+
+                    CashAccountEntity cash = new CashAccountEntity();
+                    cash.setId(id);
+                    cash.setAmount(amount);
+                    account = cash;
+
+                } else if (accountType == AccountType.MOBILE_BANKING) {
+
+                    MobileBankingAccountEntity mobile = new MobileBankingAccountEntity();
+                    mobile.setId(id);
+                    mobile.setAmount(amount);
+                    account = mobile;
+
+                } else if (accountType == AccountType.BANK) {
+
+                    BankAccountEntity bank = new BankAccountEntity();
+                    bank.setId(id);
+                    bank.setAmount(amount);
+                    account = bank;
+
+                } else {
+                    throw new RuntimeException("Unknown account type: " + accountType);
+                }
+
+                result.add(account);
             }
         }
 

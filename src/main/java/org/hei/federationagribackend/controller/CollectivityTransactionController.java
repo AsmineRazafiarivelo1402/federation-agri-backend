@@ -44,4 +44,17 @@ public class CollectivityTransactionController {
             return ResponseEntity.internalServerError().body("Internal server error");
         }
     }
+    @GetMapping("/{id}/financialAccounts")
+    public ResponseEntity<?> getFinancialAccounts(
+            @PathVariable String id,
+            @RequestParam("at") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate at
+    ) {
+        try {
+            return ResponseEntity.ok(service.getFinancialAccounts(id, at));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(404).body("Collectivity not found");
+        }
+    }
 }
