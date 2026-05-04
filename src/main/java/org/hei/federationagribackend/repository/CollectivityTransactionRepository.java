@@ -9,7 +9,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class CollectivityTransactionRepository {
@@ -72,6 +74,7 @@ public class CollectivityTransactionRepository {
 
         return result;
     }
+
     public List<FinancialAccount> findAccountsByCollectivityAndDate(
             String collectivityId,
             LocalDate at
@@ -82,7 +85,7 @@ public class CollectivityTransactionRepository {
                fa.account_type,
                COALESCE(SUM(ct.amount), 0) as amount
         FROM financial_account fa
-        LEFT JOIN collectivity_transaction ct 
+        LEFT JOIN collectivity_transaction ct
           ON fa.id = ct.account_id
         WHERE fa.collectivity_id = ?
           AND (ct.creation_date <= ? OR ct.creation_date IS NULL)
@@ -106,7 +109,7 @@ public class CollectivityTransactionRepository {
 
                 FinancialAccount account;
 
-                // 🔥 EXACTEMENT comme ton autre méthode (mapping simple)
+
                 if (accountType == AccountType.CASH) {
 
                     CashAccountEntity cash = new CashAccountEntity();
@@ -138,4 +141,93 @@ public class CollectivityTransactionRepository {
 
         return result;
     }
+//    public List<FinancialAccount> findAccountsByCollectivityAndDate(
+//            String collectivityId,
+//            LocalDate at
+//    ) throws Exception {
+//
+//        String sqlAccounts = """
+//        SELECT id, account_type, collectivity_id
+//        FROM financial_account
+//    """;
+//
+//        String sqlTransactions = """
+//        SELECT account_id, amount, creation_date
+//        FROM collectivity_transaction
+//    """;
+//
+//        List<FinancialAccount> result = new ArrayList<>();
+//        Map<String, FinancialAccount> accountMap = new HashMap<>();
+//
+//        try (PreparedStatement ps = connection.prepareStatement(sqlAccounts)) {
+//            ResultSet rs = ps.executeQuery();
+//
+//            while (rs.next()) {
+//
+//                String id = rs.getString("id");
+//                String dbCollectivityId = rs.getString("collectivity_id");
+//                AccountType type = AccountType.valueOf(rs.getString("account_type"));
+//
+//                if (!dbCollectivityId.equals(collectivityId)) continue;
+//
+//                FinancialAccount account;
+//
+//                if (type == AccountType.CASH) {
+//                    CashAccountEntity cash = new CashAccountEntity();
+//                    cash.setId(id);
+//
+//                    account = cash;
+//
+//                } else if (type == AccountType.MOBILE_BANKING) {
+//                    MobileBankingAccountEntity mobile = new MobileBankingAccountEntity();
+//                    mobile.setId(id);
+//
+//                    account = mobile;
+//
+//                } else if (type == AccountType.BANK) {
+//                    BankAccountEntity bank = new BankAccountEntity();
+//                    bank.setId(id);
+//
+//                    account = bank;
+//
+//                } else {
+//                    throw new RuntimeException("Unknown account type: " + type);
+//                }
+//
+//                result.add(account);
+//                accountMap.put(id, account);
+//            }
+//        }
+//
+//        try (PreparedStatement ps = connection.prepareStatement(sqlTransactions)) {
+//            ResultSet rs = ps.executeQuery();
+//
+//            while (rs.next()) {
+//
+//                String accountId = rs.getString("account_id");
+//                double amount = rs.getDouble("amount");
+//
+//                Date sqlDate = rs.getDate("creation_date");
+//                if (sqlDate == null) continue;
+//
+//                LocalDate creationDate = sqlDate.toLocalDate();
+//                if (creationDate.isAfter(at)) continue;
+//
+//                FinancialAccount account = accountMap.get(accountId);
+//                if (account == null) continue;
+//
+//                if (account instanceof CashAccountEntity cash) {
+//                    cash.setAmount(cash.getAmount() + amount);
+//                } else if (account instanceof MobileBankingAccountEntity mobile) {
+//                    mobile.setAmount(mobile.getAmount() + amount);
+//                } else if (account instanceof BankAccountEntity bank) {
+//                    bank.setAmount(bank.getAmount() + amount);
+//                }
+//            }
+//        }
+//
+//        return result;
+//    }
+
+
 }

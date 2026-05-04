@@ -157,9 +157,9 @@ public class CollectivityRepository {
     public CollectivityEntity findCollectivityById(String id) {
 
         String sql = """
-        SELECT id, name, registration_number, location
-        FROM collectivity
-        WHERE id = ?
+       SELECT id, name, registration_number, location
+       FROM collectivity
+       WHERE id = ?
     """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {

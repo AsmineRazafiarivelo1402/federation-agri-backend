@@ -31,7 +31,7 @@ public class CollectivityController {
             return ResponseEntity.status(400).body(e.getMessage());
         }
     }
-    @PatchMapping("/{id}/identity")
+    @PutMapping("/{id}/informations")
     public ResponseEntity<?> assignIdentity(
             @PathVariable String id,
             @RequestBody AssignCollectivityIdentityDTO dto

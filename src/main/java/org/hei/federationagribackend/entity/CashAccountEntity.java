@@ -13,4 +13,6 @@ public class CashAccountEntity implements FinancialAccount {
 
     public Double getAmount() { return amount; }
     public void setAmount(Double amount) { this.amount = amount; }
+
+
 }
