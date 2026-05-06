@@ -8,7 +8,7 @@ import org.hei.federationagribackend.entity.MemberShipFeeEntity;
 
 public class MembershipFeeMapper {
 
-    // 🔹 Entity → DTO
+    //Entity → DTO
     public static MemberShipFeeDTO toDTO(MemberShipFeeEntity entity) {
         MemberShipFeeDTO dto = new MemberShipFeeDTO();
 
@@ -22,7 +22,7 @@ public class MembershipFeeMapper {
         return dto;
     }
 
-    // 🔹 DTO → Entity
+    // DTO → Entity
     public static MemberShipFeeEntity toEntity(MemberShipFeeDTO dto) {
         MemberShipFeeEntity entity = new MemberShipFeeEntity();
 

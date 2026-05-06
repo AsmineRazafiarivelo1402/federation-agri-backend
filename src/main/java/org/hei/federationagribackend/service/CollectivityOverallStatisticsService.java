@@ -21,49 +21,42 @@ public class CollectivityOverallStatisticsService {
 
     public List<CollectivityOverallStatisticsDTO> getOverallStatistics(LocalDate from, LocalDate to) throws Exception {
 
-        // 1. Récupérer toutes les collectivités
+
         List<Map<String, Object>> collectivities = repository.getAllCollectivities();
 
-        // 2. Compter les nouveaux membres par collectivité
+
         Map<String, Integer> newMembersCount = repository.countNewMembersByPeriod(from, to);
 
-        // 3. Compter le nombre total de membres par collectivité
-        Map<String, Integer> totalMembersCount = repository.countTotalMembersByCollectivity();
+        Map<String, Double> theoreticalAmountByCollectivity = repository.getTotalTheoreticalAmountByCollectivityForPeriod(from, to);
 
-        // 4. Récupérer le montant total des cotisations actives par collectivité
-        Map<String, Double> activeFeesByCollectivity = repository.getTotalActiveFeesByCollectivity();
-
-        // 5. Récupérer les montants payés par membre par collectivité
         Map<String, Map<String, Double>> paidByMember = repository.getTotalPaidByMemberByCollectivity(from, to);
 
-        // 6. Construire la réponse
         List<CollectivityOverallStatisticsDTO> result = new ArrayList<>();
 
         for (Map<String, Object> collectivity : collectivities) {
             String collectivityId = (String) collectivity.get("id");
 
-            // Informations de la collectivité
             CollectivityInformationDTO info = new CollectivityInformationDTO();
             info.setId(collectivityId);
             info.setName((String) collectivity.get("name"));
             info.setNumber((String) collectivity.get("number"));
 
-            // Nombre de nouveaux membres
             Integer newMembers = newMembersCount.getOrDefault(collectivityId, 0);
 
-            // Calcul du pourcentage
-            Double totalFees = activeFeesByCollectivity.get(collectivityId);
+            Double theoreticalAmount = theoreticalAmountByCollectivity.get(collectivityId);
             Map<String, Double> memberPayments = paidByMember.get(collectivityId);
 
             Double percentage;
-            if (totalFees == null && (memberPayments == null || memberPayments.isEmpty())) {
-                percentage = 100.0;  // Pas de cotisation, tous sont à jour
-            } else if (totalFees == null || totalFees == 0.0) {
+
+            if (theoreticalAmount == null || theoreticalAmount == 0.0) {
                 percentage = 100.0;
             } else if (memberPayments == null || memberPayments.isEmpty()) {
                 percentage = 0.0;
             } else {
-                percentage = repository.calculateUpToDatePercentage(collectivityId, totalFees, memberPayments);
+                long upToDateCount = memberPayments.values().stream()
+                        .filter(paid -> paid >= theoreticalAmount)
+                        .count();
+                percentage = (double) upToDateCount / memberPayments.size() * 100.0;
             }
 
             CollectivityOverallStatisticsDTO dto = new CollectivityOverallStatisticsDTO();

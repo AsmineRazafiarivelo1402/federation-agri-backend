@@ -35,6 +35,9 @@ public class CollectivityStatisticsService {
             LocalDate from,
             LocalDate to
     ) throws Exception {
+        if (from.isAfter(to)) {
+            throw new IllegalArgumentException("'from' date must be before or equal to 'to' date");
+        }
 
         List<MemberDTO> members = memberRepository.findMemberDTOsByCollectivityId(collectivityId);
         Map<String, Double> earnedAmountByMember = transactionRepository.getEarnedAmountByMemberBetweenDates(collectivityId, from, to);
@@ -67,4 +70,8 @@ public class CollectivityStatisticsService {
 
         return result;
     }
+    public boolean collectivityExists(String collectivityId) throws Exception {
+        return membershipFeeRepository.collectivityExists(collectivityId);
+    }
+
 }

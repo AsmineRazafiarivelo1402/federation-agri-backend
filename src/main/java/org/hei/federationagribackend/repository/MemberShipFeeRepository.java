@@ -112,20 +112,57 @@ public class MemberShipFeeRepository {
             LocalDate to
     ) throws Exception {
         String sql = """
-        SELECT COALESCE(SUM(amount), 0) as total_theoretical
+        SELECT COALESCE(SUM(
+            CASE 
+                WHEN frequency = 'ANNUALLY' THEN 
+                    amount
+                WHEN frequency = 'MONTHLY' THEN 
+                    amount * (
+                        (EXTRACT(YEAR FROM ?::date) * 12 + EXTRACT(MONTH FROM ?::date))
+                        - (EXTRACT(YEAR FROM GREATEST(eligible_from, ?::date)) * 12 + EXTRACT(MONTH FROM GREATEST(eligible_from, ?::date)))
+                        + 1
+                    )
+                WHEN frequency = 'WEEKLY' THEN 
+                    amount * (
+                        FLOOR((EXTRACT(DOY FROM ?::date) - EXTRACT(DOY FROM GREATEST(eligible_from, ?::date))) / 7) + 1
+                    )
+                WHEN frequency = 'PUNCTUALLY' THEN 
+                    amount
+                ELSE 0
+            END
+        ), 0) as total_theoretical
         FROM membership_fee
-        WHERE collectivity_id = ? AND status = 'ACTIVE' AND eligible_from <= ?
+        WHERE collectivity_id = ? AND status = 'ACTIVE' AND eligible_from <= ?::date
     """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, collectivityId);
+
+            ps.setDate(1, java.sql.Date.valueOf(to));
             ps.setDate(2, java.sql.Date.valueOf(to));
+            ps.setDate(3, java.sql.Date.valueOf(from));
+            ps.setDate(4, java.sql.Date.valueOf(from));
+
+
+            ps.setDate(5, java.sql.Date.valueOf(to));
+            ps.setDate(6, java.sql.Date.valueOf(from));
+
+
+            ps.setString(7, collectivityId);
+            ps.setDate(8, java.sql.Date.valueOf(to));
 
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 return rs.getDouble("total_theoretical");
             }
             return 0.0;
+        }
+    }
+    public boolean collectivityExists(String collectivityId) throws Exception {
+        String sql = "SELECT 1 FROM collectivity WHERE id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, collectivityId);
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
         }
     }
 }

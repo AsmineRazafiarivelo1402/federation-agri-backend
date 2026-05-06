@@ -25,10 +25,19 @@ public class CollectivityOverallStatisticsController {
             @RequestParam LocalDate to
     ) {
         try {
-            List<CollectivityOverallStatisticsDTO> statistics = statisticsService.getOverallStatistics(from, to);
+
+            if (from.isAfter(to)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("'from' date must be before or equal to 'to' date");
+            }
+
+            List<CollectivityOverallStatisticsDTO> statistics =
+                    statisticsService.getOverallStatistics(from, to);
             return ResponseEntity.ok(statistics);
+
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getMessage());
         }
     }
 }

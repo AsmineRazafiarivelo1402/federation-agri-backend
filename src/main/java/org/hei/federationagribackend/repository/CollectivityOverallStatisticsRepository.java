@@ -39,7 +39,7 @@ public class CollectivityOverallStatisticsRepository {
         return collectivities;
     }
 
-    // 2. Compter les nouveaux membres par collectivité sur une période (avec creation_date)
+
     public Map<String, Integer> countNewMembersByPeriod(LocalDate from, LocalDate to) throws Exception {
         String sql = """
             SELECT collectivity_id, COUNT(*) as new_members_count
@@ -66,7 +66,7 @@ public class CollectivityOverallStatisticsRepository {
         return result;
     }
 
-    // 3. Compter le nombre total de membres par collectivité
+
     public Map<String, Integer> countTotalMembersByCollectivity() throws Exception {
         String sql = """
             SELECT collectivity_id, COUNT(*) as total_members
@@ -90,7 +90,7 @@ public class CollectivityOverallStatisticsRepository {
         return result;
     }
 
-    // 4. Récupérer le montant total des cotisations actives par collectivité
+
     public Map<String, Double> getTotalActiveFeesByCollectivity() throws Exception {
         String sql = """
             SELECT collectivity_id, COALESCE(SUM(amount), 0) as total_fees
@@ -114,7 +114,7 @@ public class CollectivityOverallStatisticsRepository {
         return result;
     }
 
-    // 5. Récupérer le montant total payé par membre par collectivité sur la période
+
     public Map<String, Map<String, Double>> getTotalPaidByMemberByCollectivity(LocalDate from, LocalDate to) throws Exception {
         String sql = """
             SELECT 
@@ -147,7 +147,7 @@ public class CollectivityOverallStatisticsRepository {
         return result;
     }
 
-    // 6. Calculer le pourcentage de membres à jour
+
     public double calculateUpToDatePercentage(
             String collectivityId,
             Double totalFees,
@@ -164,5 +164,50 @@ public class CollectivityOverallStatisticsRepository {
                 .count();
 
         return (double) upToDateCount / memberPayments.size() * 100.0;
+    }
+
+    public Map<String, Double> getTotalTheoreticalAmountByCollectivityForPeriod(LocalDate from, LocalDate to) throws Exception {
+        String sql = """
+        SELECT 
+            collectivity_id,
+            COALESCE(SUM(
+                CASE 
+                    WHEN frequency = 'ANNUALLY' THEN 
+                        amount
+                    WHEN frequency = 'MONTHLY' THEN 
+                        amount * (
+                            ((EXTRACT(YEAR FROM ?::date) * 12) + EXTRACT(MONTH FROM ?::date))
+                            - ((EXTRACT(YEAR FROM GREATEST(eligible_from, ?::date)) * 12) + EXTRACT(MONTH FROM GREATEST(eligible_from, ?::date)))
+                            + 1
+                        )
+                    WHEN frequency = 'PUNCTUALLY' THEN 
+                        amount
+                    ELSE 0
+                END
+            ), 0) as total_theoretical
+        FROM membership_fee
+        WHERE status = 'ACTIVE' AND eligible_from <= ?::date
+        GROUP BY collectivity_id
+    """;
+
+        Map<String, Double> result = new HashMap<>();
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setDate(1, java.sql.Date.valueOf(to));
+            ps.setDate(2, java.sql.Date.valueOf(to));
+            ps.setDate(3, java.sql.Date.valueOf(from));
+            ps.setDate(4, java.sql.Date.valueOf(from));
+            ps.setDate(5, java.sql.Date.valueOf(to));
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                String collectivityId = rs.getString("collectivity_id");
+                Double totalTheoretical = rs.getDouble("total_theoretical");
+                result.put(collectivityId, totalTheoretical);
+            }
+        }
+
+        return result;
     }
 }
