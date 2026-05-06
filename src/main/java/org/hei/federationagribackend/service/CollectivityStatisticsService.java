@@ -35,33 +35,32 @@ public class CollectivityStatisticsService {
             LocalDate to
     ) throws Exception {
 
-        // 1. Récupérer tous les membres de la collectivité
+
         List<MemberDTO> members = memberRepository.findMemberDTOsByCollectivityId(collectivityId);
 
-        // 2. Récupérer les montants encaissés par membre sur la période
+
         Map<String, Double> earnedAmountByMember = transactionRepository.getEarnedAmountByMemberBetweenDates(collectivityId, from, to);
 
-        // 3. Récupérer le montant théorique total dû par membre (cotisations actives)
+
         double theoreticalAmountPerMember = membershipFeeRepository.getTotalTheoreticalAmountForPeriod(collectivityId, from, to);
 
-        // 4. Construire la réponse avec le reste à payer
+
         List<CollectivityLocalStatisticsDTO> result = new ArrayList<>();
 
         for (MemberDTO member : members) {
             String memberId = member.getId();
 
-            // Montant déjà payé par le membre
+
             Double earnedAmount = earnedAmountByMember.getOrDefault(memberId, 0.0);
 
-            // Montant restant à payer = montant théorique - montant déjà payé
-            // Si le résultat est négatif, le reste à payer est 0
+
             Double remainingToPay = theoreticalAmountPerMember - earnedAmount;
             if (remainingToPay < 0) remainingToPay = 0.0;
 
             CollectivityLocalStatisticsDTO stats = new CollectivityLocalStatisticsDTO();
             stats.setMemberDescription(member);
             stats.setEarnedAmount(earnedAmount);
-            stats.setUnpaidAmount(remainingToPay);  // ← Reste à payer (unpaid = non encore payé)
+            stats.setUnpaidAmount(remainingToPay);
 
             result.add(stats);
         }
