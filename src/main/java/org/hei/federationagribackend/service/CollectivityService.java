@@ -27,6 +27,10 @@ public class CollectivityService {
         this.memberRepository = memberRepository;
     }
 
+    public boolean existsById(String id) {
+        return repository.existsById(id);
+    }
+
     public List<CollectivityEntity> create(List<CreateCollectivityDTO> dtos) {
 
         List<CollectivityEntity> result = new ArrayList<>();

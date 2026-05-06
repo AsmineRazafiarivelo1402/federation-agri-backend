@@ -1,5 +1,6 @@
 package org.hei.federationagribackend.service;
 
+import org.hei.federationagribackend.dto.MonthlyRecurrenceRuleDTO;
 import org.hei.federationagribackend.entity.Activity;
 import org.hei.federationagribackend.repository.ActivityRepository;
 import org.hei.federationagribackend.dto.CreateCollectivityActivityDTO;
@@ -17,7 +18,33 @@ public class ActivityService {
         this.repository = repository;
     }
 
-    public void createAll(String collectivityId, List<CreateCollectivityActivityDTO> dtos) {
+
+
+
+    public List<CreateCollectivityActivityDTO> getActivitiesByCollectivity(String collectivityId) {
+        List<Activity> entities = repository.findAllByCollectivityId(collectivityId);
+
+        return entities.stream().map(entity -> {
+            CreateCollectivityActivityDTO dto = new CreateCollectivityActivityDTO();
+            dto.setLabel(entity.getLabel());
+            dto.setActivityType(entity.getActivityType());
+            dto.setExecutiveDate(entity.getExecutiveDate());
+
+            // Si c'est une activité récurrente, on remplit le sous-DTO
+            if (entity.getWeekOrdinal() != null) {
+                MonthlyRecurrenceRuleDTO rule = new MonthlyRecurrenceRuleDTO();
+                rule.setWeekOrdinal(entity.getWeekOrdinal());
+                rule.setDayOfWeek(entity.getDayOfWeek());
+                dto.setRecurrenceRule(rule);
+            }
+
+            // Note: Tu devras peut-être ajouter une méthode au repository
+            // pour récupérer aussi les occupations depuis la table de liaison
+            return dto;
+        }).toList();
+    }
+
+    public List<CreateCollectivityActivityDTO> createAll(String collectivityId, List<CreateCollectivityActivityDTO> dtos) {
         for (CreateCollectivityActivityDTO dto : dtos) {
             Activity activity = new Activity();
             activity.setId(UUID.randomUUID().toString());
@@ -32,7 +59,7 @@ public class ActivityService {
                 activity.setExecutiveDate(dto.getExecutiveDate());
             }
 
-            repository.save(activity);
+            repository.save(activity, dto.getMemberOccupationConcerned());
 
             if (dto.getMemberOccupationConcerned() != null) {
                 for (String occ : dto.getMemberOccupationConcerned()) {
@@ -40,5 +67,10 @@ public class ActivityService {
                 }
             }
         }
+
+        // Retourne la liste reçue pour confirmer au client ce qui a été créé
+        return dtos;
     }
+
+
 }

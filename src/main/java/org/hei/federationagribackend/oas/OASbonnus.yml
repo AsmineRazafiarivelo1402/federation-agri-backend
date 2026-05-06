@@ -410,6 +410,7 @@ paths:
                   $ref: '#/components/schemas/ActivityMemberAttendance'
         404:
           description: Either collectivity not found or activity not found
+
 components:
   schemas:
     ActivityMemberAttendance:

@@ -18,6 +18,19 @@ public class CollectivityRepository {
         this.connection = connection;
     }
 
+    public boolean existsById(String id) {
+        String sql = "SELECT id FROM collectivity WHERE id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, id);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
     public CollectivityEntity save(CollectivityEntity c) {
 
         String sql = """

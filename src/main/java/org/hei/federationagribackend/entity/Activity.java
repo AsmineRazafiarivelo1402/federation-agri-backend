@@ -1,13 +1,15 @@
 package org.hei.federationagribackend.entity;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Activity {
     private String id;
     private String collectivityId;
     private String label;
     private String activityType; // MEETING, TRAINING, OTHER
-
+    private List<MemberOccupation> memberOccupationConcerned;
     // Pour la date fixe
     private LocalDate executiveDate;
 
@@ -18,11 +20,12 @@ public class Activity {
     // Constructeurs
     public Activity() {}
 
-    public Activity(String id, String collectivityId, String label, String activityType, LocalDate executiveDate, Integer weekOrdinal, String dayOfWeek) {
+    public Activity(String id, String collectivityId, String label, String activityType, List<MemberOccupation> memberOccupationConcerned, LocalDate executiveDate, Integer weekOrdinal, String dayOfWeek) {
         this.id = id;
         this.collectivityId = collectivityId;
         this.label = label;
         this.activityType = activityType;
+        this.memberOccupationConcerned = memberOccupationConcerned;
         this.executiveDate = executiveDate;
         this.weekOrdinal = weekOrdinal;
         this.dayOfWeek = dayOfWeek;
@@ -60,6 +63,14 @@ public class Activity {
         this.activityType = activityType;
     }
 
+    public List<MemberOccupation> getMemberOccupationConcerned() {
+        return memberOccupationConcerned;
+    }
+
+    public void setMemberOccupationConcerned(List<MemberOccupation> memberOccupationConcerned) {
+        this.memberOccupationConcerned = memberOccupationConcerned;
+    }
+
     public LocalDate getExecutiveDate() {
         return executiveDate;
     }
@@ -82,5 +93,9 @@ public class Activity {
 
     public void setDayOfWeek(String dayOfWeek) {
         this.dayOfWeek = dayOfWeek;
+    }
+
+    public void setMemberOccupation(List<String> occupationsByActivityId) {
+        this.memberOccupationConcerned = new ArrayList<>();
     }
 }

@@ -3,9 +3,9 @@ package org.hei.federationagribackend.repository;
 import org.hei.federationagribackend.entity.Activity;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 public class ActivityRepository {
@@ -15,7 +15,55 @@ public class ActivityRepository {
         this.connection = connection;
     }
 
-    public void save(Activity activity) {
+    public List<String> findOccupationsByActivityId(String activityId) {
+        List<String> occupations = new ArrayList<>();
+        String sql = "SELECT occupation FROM activity_occupation_concerned WHERE activity_id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, activityId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    occupations.add(resultSet.getString("occupation"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return occupations;
+    }
+
+    public List<Activity> findAllByCollectivityId(String collectivityId) {
+        List<Activity> activities = new ArrayList<>();
+        String sql = "SELECT * FROM activity WHERE collectivity_id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, collectivityId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    Activity activity = new Activity();
+                    activity.setId(resultSet.getString("id"));
+                    activity.setLabel(resultSet.getString("label"));
+                    activity.setActivityType(resultSet.getString("activity_type"));
+
+                    Date sqlDate = resultSet.getDate("executive_date");
+                    if (sqlDate != null) {
+                        activity.setExecutiveDate(sqlDate.toLocalDate());
+                    }
+
+                    activity.setWeekOrdinal(resultSet.getObject("week_ordinal", Integer.class));
+                    activity.setDayOfWeek(resultSet.getString("day_of_week"));
+                    // Juste avant d'ajouter l'activité à la liste
+                    activity.setMemberOccupation(findOccupationsByActivityId(activity.getId()));
+
+                    activities.add(activity);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return activities;
+    }
+
+    public void save(Activity activity, List<String> memberOccupationConcerned) {
         String sql = "INSERT INTO activity (id, collectivity_id, label, activity_type, executive_date, week_ordinal, day_of_week) " +
                 "VALUES (?, ?, ?, ?::activity_type_enum, ?, ?, ?)";
 
