@@ -229,12 +229,6 @@ public class CollectivityTransactionRepository {
         return result;
     }
 
-
-
-
-
-
-
         public Map<String, Double> getEarnedAmountByMemberBetweenDates(
                 String collectivityId,
                 LocalDate from,

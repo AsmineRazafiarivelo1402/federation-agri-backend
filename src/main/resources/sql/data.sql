@@ -23,13 +23,11 @@ CREATE TABLE member (
                         collectivity_id VARCHAR(255) REFERENCES collectivity(id)
 );
 
-
 CREATE TABLE member_referees (
                                  member_id VARCHAR(255) REFERENCES member(id) ON DELETE CASCADE,
                                  referee_id VARCHAR(255) REFERENCES member(id) ON DELETE CASCADE,
                                  PRIMARY KEY (member_id, referee_id)
 );
-
 
 CREATE TABLE collectivity_structure (
                                         collectivity_id VARCHAR(255) PRIMARY KEY REFERENCES collectivity(id) ON DELETE CASCADE,
@@ -67,7 +65,6 @@ CREATE TABLE membership_fee (
                                     FOREIGN KEY (collectivity_id)
                                         REFERENCES collectivity(id)
 );
-
 
 CREATE TYPE account_type_enum AS ENUM ('CASH', 'MOBILE_BANKING', 'BANK');
 
@@ -129,3 +126,37 @@ ALTER TABLE collectivity_transaction
     ADD COLUMN member_debited_id VARCHAR(255);
 
 CREATE TYPE payment_mode_enum AS ENUM ('CASH', 'MOBILE_BANKING', 'BANK_TRANSFER');
+
+CREATE TYPE attendance_status_enum AS ENUM ('MISSING', 'ATTENDED', 'UNDEFINED');
+
+CREATE TYPE activity_type_enum AS ENUM ('MEETING', 'TRAINING', 'OTHER');
+
+CREATE TABLE activity (
+                          id VARCHAR(255) PRIMARY KEY,
+                          collectivity_id VARCHAR(255) NOT NULL REFERENCES collectivity(id),
+                          label VARCHAR(255) NOT NULL,
+                          activity_type activity_type_enum NOT NULL, -- Enum
+                          week_ordinal INTEGER CHECK (week_ordinal BETWEEN 1 AND 5),
+                          day_of_week VARCHAR(2) CHECK (day_of_week IN ('MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU')),
+
+                          executive_date DATE,
+
+                          CONSTRAINT chk_date_or_recurrence CHECK (
+                              (executive_date IS NOT NULL AND week_ordinal IS NULL AND day_of_week IS NULL) OR
+                              (executive_date IS NULL AND week_ordinal IS NOT NULL AND day_of_week IS NOT NULL)
+                              )
+);
+CREATE TABLE activity_occupation_concerned (
+                                               activity_id VARCHAR(255) REFERENCES activity(id) ON DELETE CASCADE,
+                                               occupation member_occupation NOT NULL, -- Ton ENUM déjà existant
+                                               PRIMARY KEY (activity_id, occupation)
+);
+CREATE TABLE activity_attendance (
+                                     id VARCHAR(255) PRIMARY KEY,
+                                     activity_id VARCHAR(255) NOT NULL REFERENCES activity(id),
+                                     member_id VARCHAR(255) NOT NULL REFERENCES member(id),
+
+                                     attendance_status attendance_status_enum NOT NULL DEFAULT 'UNDEFINED',
+
+                                     UNIQUE(activity_id, member_id)
+);
