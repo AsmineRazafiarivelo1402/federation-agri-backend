@@ -1,15 +1,17 @@
 package org.hei.federationagribackend.entity;
 
+import org.hei.federationagribackend.dto.StatusActivity;
+
 import java.time.LocalDate;
 
 public class MemberShipFeeEntity {
     private String id;
     private String collectivityId;
     private LocalDate eligibleFrom;
-    private String frequency;
+    private Frequency frequency;
     private Double amount;
     private String label;
-    private String status;
+    private StatusActivity status;
 
     public String getId() {
         return id;
@@ -35,11 +37,11 @@ public class MemberShipFeeEntity {
         this.eligibleFrom = eligibleFrom;
     }
 
-    public String getFrequency() {
+    public Frequency getFrequency() {
         return frequency;
     }
 
-    public void setFrequency(String frequency) {
+    public void setFrequency(Frequency frequency) {
         this.frequency = frequency;
     }
 
@@ -59,11 +61,11 @@ public class MemberShipFeeEntity {
         this.label = label;
     }
 
-    public String getStatus() {
+    public StatusActivity getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(StatusActivity status) {
         this.status = status;
     }
 }

@@ -1,5 +1,7 @@
 package org.hei.federationagribackend.repository;
 
+import org.hei.federationagribackend.dto.StatusActivity;
+import org.hei.federationagribackend.entity.Frequency;
 import org.hei.federationagribackend.entity.MemberShipFeeEntity;
 import org.springframework.stereotype.Repository;
 
@@ -19,8 +21,8 @@ public class MemberShipFeeRepository {
 
     public List<MemberShipFeeEntity> saveAll(String collectivityId, List<MemberShipFeeEntity> fees) {
         String sql = """
-            INSERT INTO membership_fee (id, label, amount, frequency, status, eligible_from, collectivity_id)
-            VALUES (?, ?, ?, ?::frequency_type, ?::activity_status_type, ?, ?)
+          INSERT INTO membership_fee (id, label, amount, frequency, status, eligible_from, collectivity_id)
+                      VALUES (?, ?, ?, ?::frequency_type, ?::activity_status_type, ?, ?)
         """;
 
         List<MemberShipFeeEntity> saved = new ArrayList<>();
@@ -34,8 +36,8 @@ public class MemberShipFeeRepository {
                 ps.setString(1, id);
                 ps.setString(2, fee.getLabel());
                 ps.setDouble(3, fee.getAmount());
-                ps.setString(4, fee.getFrequency());
-                ps.setString(5, fee.getStatus());
+                ps.setString(4, fee.getFrequency().name());
+                ps.setString(5, fee.getStatus().name());
                 ps.setDate(6, Date.valueOf(fee.getEligibleFrom()));
                 ps.setString(7, collectivityId);
 
@@ -63,8 +65,9 @@ public class MemberShipFeeRepository {
                 fee.setId(rs.getString("id"));
                 fee.setLabel(rs.getString("label"));
                 fee.setAmount(rs.getDouble("amount"));
-                fee.setFrequency(rs.getString("frequency"));
-                fee.setStatus(rs.getString("status"));
+                fee.setFrequency(Frequency.valueOf(rs.getString("frequency")));
+                fee.setStatus(StatusActivity.valueOf(rs.getString("status")));
+                ps.setString(5, fee.getStatus().name());
                 fee.setEligibleFrom(rs.getDate("eligible_from").toLocalDate());
                 fee.setCollectivityId(rs.getString("collectivity_id"));
 
@@ -76,4 +79,30 @@ public class MemberShipFeeRepository {
             throw new RuntimeException(e);
         }
     }
+    public List<MemberShipFeeEntity> findActiveFeesByCollectivityId(String collectivityId) throws Exception {
+        String sql = "SELECT id, label, amount, frequency, status, eligible_from, collectivity_id FROM membership_fee WHERE collectivity_id = ? AND status = 'ACTIVE'";
+
+        List<MemberShipFeeEntity> list = new ArrayList<>();
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, collectivityId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                MemberShipFeeEntity fee = new MemberShipFeeEntity();
+                fee.setId(rs.getString("id"));
+                fee.setLabel(rs.getString("label"));
+                fee.setAmount(rs.getDouble("amount"));
+                fee.setFrequency(Frequency.valueOf(rs.getString("frequency")));
+                fee.setStatus(StatusActivity.valueOf(rs.getString("status")));
+                fee.setEligibleFrom(rs.getDate("eligible_from").toLocalDate());
+                fee.setCollectivityId(rs.getString("collectivity_id"));
+
+                list.add(fee);
+            }
+        }
+
+        return list;
+    }
+
 }

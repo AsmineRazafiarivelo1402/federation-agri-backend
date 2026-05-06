@@ -230,4 +230,41 @@ public class CollectivityTransactionRepository {
     }
 
 
+
+
+
+
+
+        public Map<String, Double> getEarnedAmountByMemberBetweenDates(
+                String collectivityId,
+                LocalDate from,
+                LocalDate to
+        ) throws Exception {
+            String sql = """
+            SELECT ct.member_debited_id, ct.amount
+            FROM collectivity_transaction ct
+            WHERE ct.collectivity_id = ?
+              AND ct.creation_date BETWEEN ? AND ?
+        """;
+
+            Map<String, Double> earnedAmountByMember = new HashMap<>();
+
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setString(1, collectivityId);
+                ps.setDate(2, java.sql.Date.valueOf(from));
+                ps.setDate(3, java.sql.Date.valueOf(to));
+
+                ResultSet rs = ps.executeQuery();
+
+                while (rs.next()) {
+                    String memberId = rs.getString("member_debited_id");
+                    Double amount = rs.getDouble("amount");
+
+                    earnedAmountByMember.put(memberId, earnedAmountByMember.getOrDefault(memberId, 0.0) + amount);
+                }
+            }
+
+            return earnedAmountByMember;
+        }
+
 }

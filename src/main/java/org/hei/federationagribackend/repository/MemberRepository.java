@@ -1,5 +1,6 @@
 package org.hei.federationagribackend.repository;
 
+import org.hei.federationagribackend.dto.MemberDTO;
 import org.hei.federationagribackend.entity.Gender;
 import org.hei.federationagribackend.entity.MemberEntity;
 import org.hei.federationagribackend.entity.MemberOccupation;
@@ -7,6 +8,9 @@ import org.hei.federationagribackend.exception.NotFoundException;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
 @Repository
 public class MemberRepository {
 
@@ -123,5 +127,38 @@ public class MemberRepository {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+    public List<MemberDTO> findMemberDTOsByCollectivityId(String collectivityId) throws Exception {
+        String sql = """
+            SELECT m.id, m.first_name, m.last_name, m.birth_date, m.gender, 
+                   m.address, m.profession, m.phone_number, m.email, m.occupation
+            FROM member m
+            WHERE m.collectivity_id = ?
+        """;
+
+        List<MemberDTO> result = new ArrayList<>();
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, collectivityId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                MemberDTO member = new MemberDTO();
+                member.setId(rs.getString("id"));
+                member.setFirstName(rs.getString("first_name"));
+                member.setLastName(rs.getString("last_name"));
+                member.setBirthDate(rs.getDate("birth_date").toLocalDate());
+                member.setGender(Gender.valueOf(rs.getString("gender")));
+                member.setAddress(rs.getString("address"));
+                member.setProfession(rs.getString("profession"));
+                member.setPhoneNumber(rs.getInt("phone_number"));
+                member.setEmail(rs.getString("email"));
+                member.setOccupation(MemberOccupation.valueOf(rs.getString("occupation")));
+
+                result.add(member);
+            }
+        }
+
+        return result;
     }
 }
