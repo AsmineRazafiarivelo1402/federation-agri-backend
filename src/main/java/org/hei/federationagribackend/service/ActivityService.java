@@ -18,9 +18,6 @@ public class ActivityService {
         this.repository = repository;
     }
 
-
-
-
     public List<CreateCollectivityActivityDTO> getActivitiesByCollectivity(String collectivityId) {
         List<Activity> entities = repository.findAllByCollectivityId(collectivityId);
 
@@ -30,7 +27,6 @@ public class ActivityService {
             dto.setActivityType(entity.getActivityType());
             dto.setExecutiveDate(entity.getExecutiveDate());
 
-            // Si c'est une activité récurrente, on remplit le sous-DTO
             if (entity.getWeekOrdinal() != null) {
                 MonthlyRecurrenceRuleDTO rule = new MonthlyRecurrenceRuleDTO();
                 rule.setWeekOrdinal(entity.getWeekOrdinal());
@@ -38,11 +34,14 @@ public class ActivityService {
                 dto.setRecurrenceRule(rule);
             }
 
-            // Note: Tu devras peut-être ajouter une méthode au repository
-            // pour récupérer aussi les occupations depuis la table de liaison
+            List<String> occupations = repository.findOccupationsByActivityId(entity.getId());
+            dto.setMemberOccupationConcerned(occupations);
+
             return dto;
         }).toList();
     }
+
+
 
     public List<CreateCollectivityActivityDTO> createAll(String collectivityId, List<CreateCollectivityActivityDTO> dtos) {
         for (CreateCollectivityActivityDTO dto : dtos) {

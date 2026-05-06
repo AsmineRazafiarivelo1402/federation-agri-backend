@@ -46,7 +46,15 @@ public class ActivityController {
     }
 
     @GetMapping
-    public List<CreateCollectivityActivityDTO> getActivities(@PathVariable String id) {
-        return activityService.getActivitiesByCollectivity(id);
+    public ResponseEntity<Object> getActivities(@PathVariable String id) {
+
+        if (!collectivityService.existsById(id)) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorResponse("Collectivity not found"));
+        }
+
+        List<CreateCollectivityActivityDTO> activities = activityService.getActivitiesByCollectivity(id);
+        return ResponseEntity.status(HttpStatus.OK).body(activities);
     }
 }
