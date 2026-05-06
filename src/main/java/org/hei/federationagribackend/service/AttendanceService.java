@@ -28,6 +28,20 @@ public class AttendanceService {
         this.collectivityRepository = collectivityRepository;
         this.memberRepository = memberRepository;
     }
+    public List<ActivityMemberAttendanceDTO> getAttendance(String collectivityId, String activityId) {
+
+        if (!collectivityRepository.existsById(collectivityId)) {
+            throw new NotFoundException("Collectivity not found");
+        }
+
+        if (!attendanceRepository.existsActivityById(activityId)) {
+            throw new NotFoundException("Activity not found");
+        }
+
+        return attendanceRepository.findAllByActivityId(activityId);
+    }
+
+
 
     public List<ActivityMemberAttendanceDTO> createAttendance(
             String collectivityId,

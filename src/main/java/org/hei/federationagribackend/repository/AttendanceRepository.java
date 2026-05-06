@@ -1,11 +1,15 @@
 package org.hei.federationagribackend.repository;
 
+import org.hei.federationagribackend.dto.ActivityMemberAttendanceDTO;
+import org.hei.federationagribackend.dto.MemberDescriptionDTO;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 public class AttendanceRepository {
@@ -15,6 +19,7 @@ public class AttendanceRepository {
     public AttendanceRepository(Connection connection) {
         this.connection = connection;
     }
+
 
     public boolean existsActivityById(String activityId) {
         String sql = "SELECT id FROM activity WHERE id = ?";
@@ -67,6 +72,39 @@ public class AttendanceRepository {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public List<ActivityMemberAttendanceDTO> findAllByActivityId(String activityId) {
+        List<ActivityMemberAttendanceDTO> result = new ArrayList<>();
+        String sql = "SELECT aa.id, aa.member_id, aa.attendance_status, " +
+                "m.first_name, m.last_name, m.email, m.occupation " +
+                "FROM activity_attendance aa " +
+                "JOIN member m ON aa.member_id = m.id " +
+                "WHERE aa.activity_id = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, activityId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ActivityMemberAttendanceDTO dto = new ActivityMemberAttendanceDTO();
+                    dto.setId(rs.getString("id"));
+                    dto.setAttendanceStatus(rs.getString("attendance_status"));
+
+                    MemberDescriptionDTO memberDesc = new MemberDescriptionDTO();
+                    memberDesc.setId(rs.getString("member_id"));
+                    memberDesc.setFirstName(rs.getString("first_name"));
+                    memberDesc.setLastName(rs.getString("last_name"));
+                    memberDesc.setEmail(rs.getString("email"));
+                    memberDesc.setOccupation(rs.getString("occupation"));
+                    dto.setMemberDescription(memberDesc);
+
+                    result.add(dto);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return result;
     }
 
 }

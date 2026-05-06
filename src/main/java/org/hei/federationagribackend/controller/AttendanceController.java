@@ -21,6 +21,18 @@ public class AttendanceController {
     public AttendanceController(AttendanceService attendanceService) {
         this.attendanceService = attendanceService;
     }
+    @GetMapping
+    public ResponseEntity<Object> getAttendance(
+            @PathVariable String id,
+            @PathVariable String activityId) {
+
+        try {
+            List<ActivityMemberAttendanceDTO> result = attendanceService.getAttendance(id, activityId);
+            return ResponseEntity.status(HttpStatus.OK).body(result);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
+        }
+    }
 
     @PostMapping
     public ResponseEntity<Object> createAttendance(
