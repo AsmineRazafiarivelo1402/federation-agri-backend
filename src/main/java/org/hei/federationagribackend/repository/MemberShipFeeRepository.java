@@ -6,6 +6,7 @@ import org.hei.federationagribackend.entity.MemberShipFeeEntity;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -105,4 +106,26 @@ public class MemberShipFeeRepository {
         return list;
     }
 
+    public double getTotalTheoreticalAmountForPeriod(
+            String collectivityId,
+            LocalDate from,
+            LocalDate to
+    ) throws Exception {
+        String sql = """
+        SELECT COALESCE(SUM(amount), 0) as total_theoretical
+        FROM membership_fee
+        WHERE collectivity_id = ? AND status = 'ACTIVE' AND eligible_from <= ?
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, collectivityId);
+            ps.setDate(2, java.sql.Date.valueOf(to));
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble("total_theoretical");
+            }
+            return 0.0;
+        }
+    }
 }
