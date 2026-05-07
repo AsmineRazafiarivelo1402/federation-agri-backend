@@ -1,10 +1,11 @@
 package org.hei.federationagribackend.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.hei.federationagribackend.dto.AssignCollectivityIdentityDTO;
 import org.hei.federationagribackend.dto.CreateCollectivityDTO;
 import org.hei.federationagribackend.entity.CollectivityEntity;
+import org.hei.federationagribackend.security.ApiKeyValidator;
 import org.hei.federationagribackend.service.CollectivityService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,14 +16,17 @@ import java.util.List;
 public class CollectivityController {
 
     private final CollectivityService service;
-
-    public CollectivityController(CollectivityService service) {
+    private final ApiKeyValidator apiKeyValidator;
+    public CollectivityController(CollectivityService service, ApiKeyValidator apiKeyValidator) {
         this.service = service;
+        this.apiKeyValidator = apiKeyValidator;
     }
 
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody List<CreateCollectivityDTO> dtos) {
+    public ResponseEntity<?> create(@RequestBody List<CreateCollectivityDTO> dtos,
+                                    HttpServletRequest request) {
 
+        apiKeyValidator.validate(request);
         try {
             List<CollectivityEntity> result = service.create(dtos);
             return ResponseEntity.status(201).body(result);
@@ -34,8 +38,10 @@ public class CollectivityController {
     @PutMapping("/{id}/informations")
     public ResponseEntity<?> assignIdentity(
             @PathVariable String id,
-            @RequestBody AssignCollectivityIdentityDTO dto
+            @RequestBody AssignCollectivityIdentityDTO dto,
+            HttpServletRequest request
     ) {
+        apiKeyValidator.validate(request);
 
         try {
             CollectivityEntity result = service.assignIdentity(id, dto);
@@ -51,7 +57,8 @@ public class CollectivityController {
         }
     }
     @GetMapping("/{id}")
-    public ResponseEntity<?> getCollectivity(@PathVariable String id) {
+    public ResponseEntity<?> getCollectivity(@PathVariable String id,HttpServletRequest request) {
+        apiKeyValidator.validate(request);
         try {
             return ResponseEntity.ok(service.getCollectivityById(id));
         } catch (Exception e) {

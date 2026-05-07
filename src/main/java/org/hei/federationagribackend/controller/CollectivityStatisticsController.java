@@ -1,7 +1,9 @@
 package org.hei.federationagribackend.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.hei.federationagribackend.dto.CollectivityLocalStatisticsDTO;
 import org.hei.federationagribackend.dto.CollectivityOverallStatisticsDTO;
+import org.hei.federationagribackend.security.ApiKeyValidator;
 import org.hei.federationagribackend.service.CollectivityOverallStatisticsService;
 import org.hei.federationagribackend.service.CollectivityStatisticsService;
 import org.springframework.http.HttpStatus;
@@ -17,18 +19,28 @@ public class CollectivityStatisticsController {
 
     private final CollectivityStatisticsService statisticsService;
     private final CollectivityOverallStatisticsService overallStatisticsService;
+    private final ApiKeyValidator apiKeyValidator;
 
-    public CollectivityStatisticsController(CollectivityStatisticsService statisticsService, CollectivityOverallStatisticsService overallStatisticsService) {
+
+
+
+    public CollectivityStatisticsController(CollectivityStatisticsService statisticsService, CollectivityOverallStatisticsService overallStatisticsService, ApiKeyValidator apiKeyValidator) {
         this.statisticsService = statisticsService;
         this.overallStatisticsService = overallStatisticsService;
+        this.apiKeyValidator = apiKeyValidator;
     }
+
+//    HttpServletRequest request
+// apiKeyValidator.validate(request);
 
     @GetMapping("/{id}/statistics")
     public ResponseEntity<?> getCollectivityStatistics(
             @PathVariable("id") String collectivityId,
             @RequestParam LocalDate from,
-            @RequestParam LocalDate to
+            @RequestParam LocalDate to,
+            HttpServletRequest request
     ) {
+        apiKeyValidator.validate(request);
         try {
 
             if (from.isAfter(to)) {
@@ -55,8 +67,10 @@ public class CollectivityStatisticsController {
     @GetMapping("/overall-statistics")
     public ResponseEntity<?> getOverallStatistics(
             @RequestParam LocalDate from,
-            @RequestParam LocalDate to
+            @RequestParam LocalDate to,
+            HttpServletRequest request
     ) {
+        apiKeyValidator.validate(request);
         try {
             List<CollectivityOverallStatisticsDTO> statistics =
                     overallStatisticsService.getOverallStatistics(from, to);

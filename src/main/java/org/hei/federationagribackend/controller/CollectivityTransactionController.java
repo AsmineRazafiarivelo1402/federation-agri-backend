@@ -1,6 +1,8 @@
 package org.hei.federationagribackend.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.hei.federationagribackend.entity.CollectivityTransactionEntity;
+import org.hei.federationagribackend.security.ApiKeyValidator;
 import org.hei.federationagribackend.service.CollectivityTransactionService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -14,9 +16,10 @@ import java.util.List;
 public class CollectivityTransactionController {
 
     private final CollectivityTransactionService service;
-
-    public CollectivityTransactionController(CollectivityTransactionService service) {
+    private final ApiKeyValidator apiKeyValidator;
+    public CollectivityTransactionController(CollectivityTransactionService service, ApiKeyValidator apiKeyValidator) {
         this.service = service;
+        this.apiKeyValidator = apiKeyValidator;
     }
 
     @GetMapping("/{id}/transactions")
@@ -29,8 +32,10 @@ public class CollectivityTransactionController {
 
             @RequestParam("to")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            LocalDate to
+            LocalDate to,
+            HttpServletRequest request
     ) {
+        apiKeyValidator.validate(request);
         try {
             List<CollectivityTransactionEntity> transactions =
                     service.getTransactions(collectivityId, from, to);
@@ -47,8 +52,10 @@ public class CollectivityTransactionController {
     @GetMapping("/{id}/financialAccounts")
     public ResponseEntity<?> getFinancialAccounts(
             @PathVariable String id,
-            @RequestParam("at") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate at
+            @RequestParam("at") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate at,
+            HttpServletRequest request
     ) {
+        apiKeyValidator.validate(request);
         try {
             return ResponseEntity.ok(service.getFinancialAccounts(id, at));
         } catch (IllegalArgumentException e) {

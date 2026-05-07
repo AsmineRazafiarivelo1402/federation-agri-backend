@@ -1,9 +1,11 @@
 package org.hei.federationagribackend.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.hei.federationagribackend.dto.CreateMemberDTO;
 import org.hei.federationagribackend.dto.MemberDTO;
 import org.hei.federationagribackend.exception.BadRequestException;
 import org.hei.federationagribackend.exception.NotFoundException;
+import org.hei.federationagribackend.security.ApiKeyValidator;
 import org.hei.federationagribackend.service.MemberService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,17 +17,18 @@ import java.util.List;
 public class MemberController {
 
     private final MemberService memberService;
+    private final ApiKeyValidator apiKeyValidator;
 
-    public MemberController(MemberService memberService) {
+    public MemberController(MemberService memberService, ApiKeyValidator apiKeyValidator) {
         this.memberService = memberService;
+        this.apiKeyValidator = apiKeyValidator;
     }
-    @GetMapping("/hello")
-    public String hello(){
-        return "hello";
-    }
+
 
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody List<CreateMemberDTO> request) {
+    public ResponseEntity<?> create(@RequestBody List<CreateMemberDTO> request,
+                                    HttpServletRequest requests) {
+        apiKeyValidator.validate(requests);
 
         try {
             List<MemberDTO> response = memberService.createMembers(request);
