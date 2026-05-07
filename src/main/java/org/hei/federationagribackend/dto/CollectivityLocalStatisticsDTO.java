@@ -21,7 +21,6 @@ public class CollectivityLocalStatisticsDTO {
         this.assiduityPercentage = assiduityPercentage;
     }
 
-    // Getters & Setters
     public MemberDescriptionDTO getMemberDescription() {
         return memberDescription;
     }

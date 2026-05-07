@@ -3,6 +3,7 @@ package org.hei.federationagribackend.dto;
 import org.hei.federationagribackend.entity.Gender;
 import org.hei.federationagribackend.entity.MemberOccupation;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -125,5 +126,9 @@ public class CreateMemberDTO {
 
     public void setMembershipDuesPaid(Boolean membershipDuesPaid) {
         this.membershipDuesPaid = membershipDuesPaid;
+    }
+
+    public Date getDate(String creationDate) {
+    return Date.valueOf(LocalDate.parse(creationDate));
     }
 }

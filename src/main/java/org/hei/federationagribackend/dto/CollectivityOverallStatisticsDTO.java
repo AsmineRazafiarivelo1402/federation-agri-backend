@@ -4,11 +4,10 @@ public class CollectivityOverallStatisticsDTO {
     private CollectivityInformationDTO collectivityInformation;
     private Integer newMembersNumber;
     private Double overallMemberCurrentDuePercentage;
-    private Double overallMemberAssiduityPercentage; // Champ pour le Bonus 2
+    private Double overallMemberAssiduityPercentage;
 
     public CollectivityOverallStatisticsDTO() {}
 
-    // Getters et Setters
     public CollectivityInformationDTO getCollectivityInformation() {
         return collectivityInformation;
     }

@@ -20,6 +20,7 @@ public class MemberMapper {
         entity.setOccupation(dto.getOccupation());
         entity.setRegistrationFeePaid(dto.getRegistrationFeePaid());
         entity.setMembershipDuesPaid(dto.getMembershipDuesPaid());
+        entity.setCreationDate(dto.getDate("creation_date").toLocalDate());
 
         return entity;
     }

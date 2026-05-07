@@ -20,25 +20,48 @@ public class MemberEntity {
     private Boolean registrationFeePaid;
     private Boolean membershipDuesPaid;
     private List<MemberEntity> referees = new ArrayList<>();
-
-    public MemberEntity(String id, String firstName, String lastName, LocalDate birthDate, Gender gender, String address, String profession, Integer phoneNumber, String email, String memberIdentifier, MemberOccupation occupation, Boolean registrationFeePaid, Boolean membershipDuesPaid) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.birthDate = birthDate;
-        this.gender = gender;
-        this.address = address;
-        this.profession = profession;
-        this.phoneNumber = phoneNumber;
-        this.email = email;
-        this.memberIdentifier = memberIdentifier;
-        this.occupation = occupation;
-        this.registrationFeePaid = registrationFeePaid;
-        this.membershipDuesPaid = membershipDuesPaid;
-    }
+    private LocalDate creationDate;
 
     public MemberEntity() {
+    }
 
+    public MemberEntity(LocalDate creationDate, List<MemberEntity> referees, Boolean membershipDuesPaid, Boolean registrationFeePaid, MemberOccupation occupation, String memberIdentifier, String email, Integer phoneNumber, String profession, String address, Gender gender, LocalDate birthDate, String lastName, String firstName, String id) {
+        this.creationDate = creationDate;
+        this.referees = referees;
+        this.membershipDuesPaid = membershipDuesPaid;
+        this.registrationFeePaid = registrationFeePaid;
+        this.occupation = occupation;
+        this.memberIdentifier = memberIdentifier;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.profession = profession;
+        this.address = address;
+        this.gender = gender;
+        this.birthDate = birthDate;
+        this.lastName = lastName;
+        this.firstName = firstName;
+        this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return "MemberEntity{" +
+                "id='" + id + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", birthDate=" + birthDate +
+                ", gender=" + gender +
+                ", address='" + address + '\'' +
+                ", profession='" + profession + '\'' +
+                ", phoneNumber=" + phoneNumber +
+                ", email='" + email + '\'' +
+                ", memberIdentifier='" + memberIdentifier + '\'' +
+                ", occupation=" + occupation +
+                ", registrationFeePaid=" + registrationFeePaid +
+                ", membershipDuesPaid=" + membershipDuesPaid +
+                ", referees=" + referees +
+                ", creationDate=" + creationDate +
+                '}';
     }
 
     public String getId() {
@@ -153,36 +176,11 @@ public class MemberEntity {
         this.referees = referees;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        MemberEntity that = (MemberEntity) o;
-        return Objects.equals(id, that.id) && Objects.equals(firstName, that.firstName) && Objects.equals(lastName, that.lastName) && Objects.equals(birthDate, that.birthDate) && gender == that.gender && Objects.equals(address, that.address) && Objects.equals(profession, that.profession) && Objects.equals(phoneNumber, that.phoneNumber) && Objects.equals(email, that.email) && Objects.equals(memberIdentifier, that.memberIdentifier) && occupation == that.occupation && Objects.equals(registrationFeePaid, that.registrationFeePaid) && Objects.equals(membershipDuesPaid, that.membershipDuesPaid);
+    public LocalDate getCreationDate() {
+        return creationDate;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, firstName, lastName, birthDate, gender, address, profession, phoneNumber, email, memberIdentifier, occupation, registrationFeePaid, membershipDuesPaid);
+    public void setCreationDate(LocalDate creationDate) {
+        this.creationDate = creationDate;
     }
-
-    @Override
-    public String toString() {
-        return "MemberEntity{" +
-                "id='" + id + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", birthDate=" + birthDate +
-                ", gender=" + gender +
-                ", address='" + address + '\'' +
-                ", profession='" + profession + '\'' +
-                ", phoneNumber=" + phoneNumber +
-                ", email='" + email + '\'' +
-                ", memberIdentifier='" + memberIdentifier + '\'' +
-                ", occupation=" + occupation +
-                ", registrationFeePaid=" + registrationFeePaid +
-                ", membershipDuesPaid=" + membershipDuesPaid +
-                '}';
-    }
-
-
 }

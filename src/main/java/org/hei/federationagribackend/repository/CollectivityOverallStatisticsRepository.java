@@ -165,4 +165,6 @@ public class CollectivityOverallStatisticsRepository {
         long upToDateCount = memberPayments.values().stream().filter(paid -> paid >= expectedAmount).count();
         return (double) upToDateCount / memberPayments.size() * 100.0;
     }
+
+
 }

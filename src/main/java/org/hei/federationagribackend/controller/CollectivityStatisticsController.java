@@ -1,6 +1,8 @@
 package org.hei.federationagribackend.controller;
 
 import org.hei.federationagribackend.dto.CollectivityLocalStatisticsDTO;
+import org.hei.federationagribackend.dto.CollectivityOverallStatisticsDTO;
+import org.hei.federationagribackend.service.CollectivityOverallStatisticsService;
 import org.hei.federationagribackend.service.CollectivityStatisticsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,9 +16,11 @@ import java.util.List;
 public class CollectivityStatisticsController {
 
     private final CollectivityStatisticsService statisticsService;
+    private final CollectivityOverallStatisticsService overallStatisticsService;
 
-    public CollectivityStatisticsController(CollectivityStatisticsService statisticsService) {
+    public CollectivityStatisticsController(CollectivityStatisticsService statisticsService, CollectivityOverallStatisticsService overallStatisticsService) {
         this.statisticsService = statisticsService;
+        this.overallStatisticsService = overallStatisticsService;
     }
 
     @GetMapping("/{id}/statistics")
@@ -48,4 +52,18 @@ public class CollectivityStatisticsController {
                     .body(e.getMessage());
         }
     }
+    @GetMapping("/overall-statistics")
+    public ResponseEntity<?> getOverallStatistics(
+            @RequestParam LocalDate from,
+            @RequestParam LocalDate to
+    ) {
+        try {
+            List<CollectivityOverallStatisticsDTO> statistics =
+                    overallStatisticsService.getOverallStatistics(from, to);
+            return ResponseEntity.ok(statistics);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
 }
