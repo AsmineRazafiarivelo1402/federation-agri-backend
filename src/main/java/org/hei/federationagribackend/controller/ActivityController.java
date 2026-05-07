@@ -45,6 +45,8 @@ public class ActivityController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
+
+
     @GetMapping
     public ResponseEntity<Object> getActivities(@PathVariable String id) {
 
