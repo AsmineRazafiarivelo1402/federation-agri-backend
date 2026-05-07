@@ -108,7 +108,6 @@ CREATE TABLE collectivity_transaction (
                                           creation_date DATE NOT NULL,
                                           amount NUMERIC(15,2) NOT NULL,
                                           payment_mode VARCHAR(50) NOT NULL,
-
                                           account_id VARCHAR(255) NOT NULL,
                                           member_id VARCHAR(255) NOT NULL,
                                           collectivity_id VARCHAR(255) NOT NULL,

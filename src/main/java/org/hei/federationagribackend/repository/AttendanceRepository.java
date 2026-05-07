@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -106,5 +107,44 @@ public class AttendanceRepository {
         }
         return result;
     }
+
+    public Double calculateAssiduityPercentage(String memberId, String collectivityId, LocalDate from, LocalDate to) {
+        String sql = """
+        SELECT 
+            COUNT(CASE WHEN aa.attendance_status = 'ATTENDED' THEN 1 END) AS attended_count,
+            COUNT(*) AS total_activities
+        FROM activity_attendance aa 
+        JOIN activity a ON aa.activity_id = a.id 
+        WHERE aa.member_id = ? 
+          AND a.collectivity_id = ? 
+          AND a.executive_date BETWEEN ? AND ?
+        """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, memberId);
+            ps.setString(2, collectivityId);
+            ps.setObject(3, from);
+            ps.setObject(4, to);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    long attended = rs.getLong("attended_count");
+                    long total = rs.getLong("total_activities");
+
+                    if (total == 0) {
+                        return 0.0;
+                    }
+
+                    // Calcul du pourcentage
+                    return (double) attended / total * 100.0;
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur lors du calcul du taux d'assiduité pour le membre: " + memberId, e);
+        }
+        return 0.0;
+    }
+
+
 
 }
