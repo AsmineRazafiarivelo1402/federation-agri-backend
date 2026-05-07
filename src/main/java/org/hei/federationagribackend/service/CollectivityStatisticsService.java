@@ -1,18 +1,14 @@
 package org.hei.federationagribackend.service;
 
 import org.hei.federationagribackend.dto.CollectivityLocalStatisticsDTO;
+import org.hei.federationagribackend.dto.MemberDescriptionDTO;
 import org.hei.federationagribackend.dto.MemberDTO;
-import org.hei.federationagribackend.entity.Frequency;
-import org.hei.federationagribackend.entity.MemberShipFeeEntity;
-import org.hei.federationagribackend.entity.MemberShipFeeEntity;
 import org.hei.federationagribackend.repository.CollectivityTransactionRepository;
 import org.hei.federationagribackend.repository.MemberRepository;
-import org.hei.federationagribackend.repository.MemberShipFeeRepository;
 import org.hei.federationagribackend.repository.MemberShipFeeRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -39,76 +35,43 @@ public class CollectivityStatisticsService {
             LocalDate from,
             LocalDate to
     ) throws Exception {
+        if (from.isAfter(to)) {
+            throw new IllegalArgumentException("'from' date must be before or equal to 'to' date");
+        }
 
         List<MemberDTO> members = memberRepository.findMemberDTOsByCollectivityId(collectivityId);
-
         Map<String, Double> earnedAmountByMember = transactionRepository.getEarnedAmountByMemberBetweenDates(collectivityId, from, to);
-
-        List<MemberShipFeeEntity> activeFees = membershipFeeRepository.findActiveFeesByCollectivityId(collectivityId);
+        double theoreticalAmountPerMember = membershipFeeRepository.getTotalTheoreticalAmountForPeriod(collectivityId, from, to);
 
         List<CollectivityLocalStatisticsDTO> result = new ArrayList<>();
 
         for (MemberDTO member : members) {
             String memberId = member.getId();
 
+            // Utiliser MemberDescriptionDTO avec seulement 5 champs
+            MemberDescriptionDTO memberDescription = new MemberDescriptionDTO();
+            memberDescription.setId(member.getId());
+            memberDescription.setFirstName(member.getFirstName());
+            memberDescription.setLastName(member.getLastName());
+            memberDescription.setEmail(member.getEmail());
+            memberDescription.setOccupation(member.getOccupation().name());
+
             Double earnedAmount = earnedAmountByMember.getOrDefault(memberId, 0.0);
+            Double remainingToPay = theoreticalAmountPerMember - earnedAmount;
+            if (remainingToPay < 0) remainingToPay = 0.0;
 
-            Double unpaidAmount = calculateUnpaidAmountForMember(memberId, activeFees, from, to);
+            CollectivityLocalStatisticsDTO stats = new CollectivityLocalStatisticsDTO();
+            stats.setMemberDescription(memberDescription);
+            stats.setEarnedAmount(earnedAmount);
+            stats.setUnpaidAmount(remainingToPay);
 
-            CollectivityLocalStatisticsDTO stats = new CollectivityLocalStatisticsDTO(member, earnedAmount, unpaidAmount);
             result.add(stats);
         }
 
         return result;
     }
-
-    private Double calculateUnpaidAmountForMember(
-            String memberId,
-            List<MemberShipFeeEntity> activeFees,
-            LocalDate from,
-            LocalDate to
-    ) {
-        double totalUnpaid = 0.0;
-
-        for (MemberShipFeeEntity fee : activeFees) {
-            LocalDate eligibleFrom = fee.getEligibleFrom();
-
-            if (eligibleFrom.isAfter(to)) {
-                continue;
-            }
-
-            LocalDate startDate = eligibleFrom.isBefore(from) ? from : eligibleFrom;
-            if (startDate.isAfter(to)) {
-                continue;
-            }
-
-            int numberOfInstallments = calculateNumberOfInstallments(startDate, to, fee.getFrequency());
-
-            totalUnpaid += numberOfInstallments * fee.getAmount();
-        }
-
-        return totalUnpaid;
+    public boolean collectivityExists(String collectivityId) throws Exception {
+        return membershipFeeRepository.collectivityExists(collectivityId);
     }
 
-    private int calculateNumberOfInstallments(LocalDate start, LocalDate end, Frequency frequency) {
-        if (start.isAfter(end)) {
-            return 0;
-        }
-
-        switch (frequency) {
-            case WEEKLY:
-                long weeks = Period.between(start, end).getDays() / 7;
-                return (int) weeks + 1;
-            case MONTHLY:
-                long months = Period.between(start, end).toTotalMonths();
-                return (int) months + 1;
-            case ANNUALLY:
-                long years = Period.between(start, end).getYears();
-                return (int) years + 1;
-            case PUNCTUALLY:
-                return 1;
-            default:
-                return 0;
-        }
-    }
 }

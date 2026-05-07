@@ -229,36 +229,46 @@ public class CollectivityTransactionRepository {
         return result;
     }
 
-        public Map<String, Double> getEarnedAmountByMemberBetweenDates(
-                String collectivityId,
-                LocalDate from,
-                LocalDate to
-        ) throws Exception {
-            String sql = """
-            SELECT ct.member_debited_id, ct.amount
-            FROM collectivity_transaction ct
-            WHERE ct.collectivity_id = ?
-              AND ct.creation_date BETWEEN ? AND ?
-        """;
+    // new implementation
+    public Map<String, Double> getEarnedAmountByMemberBetweenDates(
+            String collectivityId,
+            LocalDate from,
+            LocalDate to
+    ) throws Exception {
+        String sql = """
+        SELECT 
+            ct.member_debited_id as member_id,
+            COALESCE(SUM(ct.amount), 0) as earned_amount
+        FROM collectivity_transaction ct
+        WHERE ct.collectivity_id = ?
+          AND ct.creation_date BETWEEN ? AND ?
+        GROUP BY ct.member_debited_id
+    """;
 
-            Map<String, Double> earnedAmountByMember = new HashMap<>();
+        Map<String, Double> earnedAmountByMember = new HashMap<>();
 
-            try (PreparedStatement ps = connection.prepareStatement(sql)) {
-                ps.setString(1, collectivityId);
-                ps.setDate(2, java.sql.Date.valueOf(from));
-                ps.setDate(3, java.sql.Date.valueOf(to));
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, collectivityId);
+            ps.setDate(2, java.sql.Date.valueOf(from));
+            ps.setDate(3, java.sql.Date.valueOf(to));
 
-                ResultSet rs = ps.executeQuery();
+            ResultSet rs = ps.executeQuery();
 
-                while (rs.next()) {
-                    String memberId = rs.getString("member_debited_id");
-                    Double amount = rs.getDouble("amount");
-
-                    earnedAmountByMember.put(memberId, earnedAmountByMember.getOrDefault(memberId, 0.0) + amount);
-                }
+            while (rs.next()) {
+                String memberId = rs.getString("member_id");
+                Double amount = rs.getDouble("earned_amount");
+                earnedAmountByMember.put(memberId, amount);
             }
-
-            return earnedAmountByMember;
         }
+
+        return earnedAmountByMember;
+    }
+
+
+
+
+
+
+
 
 }
