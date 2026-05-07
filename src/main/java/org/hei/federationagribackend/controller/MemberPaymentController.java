@@ -1,8 +1,10 @@
 package org.hei.federationagribackend.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.hei.federationagribackend.dto.CreateMemberPaymentDto;
 import org.hei.federationagribackend.entity.MemberPayment;
 import org.hei.federationagribackend.repository.MemberPaymentRepository;
+import org.hei.federationagribackend.security.ApiKeyValidator;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -12,15 +14,18 @@ import java.util.UUID;
 @RequestMapping("/members")
 public class MemberPaymentController {
     private final MemberPaymentRepository memberPaymentRepository;
-
-    public MemberPaymentController(MemberPaymentRepository memberPaymentRepository) {
+    private final ApiKeyValidator apiKeyValidator;
+    public MemberPaymentController(MemberPaymentRepository memberPaymentRepository, ApiKeyValidator apiKeyValidator) {
         this.memberPaymentRepository = memberPaymentRepository;
+        this.apiKeyValidator = apiKeyValidator;
     }
 
     @PostMapping("/{id}/payments")
     public List<MemberPayment> createPayments(
             @PathVariable("id") String memberId,
-            @RequestBody List<CreateMemberPaymentDto> dtos) {
+            @RequestBody List<CreateMemberPaymentDto> dtos,
+            HttpServletRequest request) {
+        apiKeyValidator.validate(request);
         System.out.println("Nombre de paiements reçus : " + dtos.size());
         List<MemberPayment> createdPayments = new ArrayList<>();
 
