@@ -13,6 +13,9 @@ public class CollectivityStructure {
     private String treasurerId;
     private String secretaryId;
 
+    public CollectivityStructure() {
+    }
+
     public CollectivityStructure(MemberEntity president, MemberEntity vicePresident, MemberEntity treasurer, MemberEntity secretary, String presidentId, String vicePresidentId, String treasurerId, String secretaryId) {
         this.president = president;
         this.vicePresident = vicePresident;

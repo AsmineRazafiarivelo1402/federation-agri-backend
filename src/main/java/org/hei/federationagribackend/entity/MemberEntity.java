@@ -1,6 +1,8 @@
 package org.hei.federationagribackend.entity;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class MemberEntity {
@@ -17,6 +19,7 @@ public class MemberEntity {
     private MemberOccupation occupation;
     private Boolean registrationFeePaid;
     private Boolean membershipDuesPaid;
+    private List<MemberEntity> referees = new ArrayList<>();
 
     public MemberEntity(String id, String firstName, String lastName, LocalDate birthDate, Gender gender, String address, String profession, Integer phoneNumber, String email, String memberIdentifier, MemberOccupation occupation, Boolean registrationFeePaid, Boolean membershipDuesPaid) {
         this.id = id;
@@ -32,6 +35,10 @@ public class MemberEntity {
         this.occupation = occupation;
         this.registrationFeePaid = registrationFeePaid;
         this.membershipDuesPaid = membershipDuesPaid;
+    }
+
+    public MemberEntity() {
+
     }
 
     public String getId() {
@@ -138,6 +145,14 @@ public class MemberEntity {
         this.membershipDuesPaid = membershipDuesPaid;
     }
 
+    public List<MemberEntity> getReferees() {
+        return referees;
+    }
+
+    public void setReferees(List<MemberEntity> referees) {
+        this.referees = referees;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -168,4 +183,6 @@ public class MemberEntity {
                 ", membershipDuesPaid=" + membershipDuesPaid +
                 '}';
     }
+
+
 }
